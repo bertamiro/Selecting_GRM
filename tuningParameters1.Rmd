@@ -1,0 +1,115 @@
+---
+title: "Tuning parameters for L-shape selection methods"
+output:
+  html_document:
+    highlight: textmate
+    theme: spacelab
+    toc: yes
+  html_notebook: default
+---
+
+# Introduction
+
+Selection of L-shaped genes is being approached based on different methods, which depend on a variety of parameters. Changing the parameters affects the number of genes taht will be called "L-shaped" so we would want to find an optimal set of parameters for every method such that some performance measures such as sensitivity or specificity can be optimized.
+
+A problem with this approach is that it requires a set of "TRUE Positives" -genes known to have L-shape- or TRUE negatives genes kown not to have L-shape- and this is very hard to obtain.
+
+A way to do it is by visual inspecting the genes and selecting two sets that can be described as "clearly _" and "clearly non-L" which, by the way, is a more difficult concept.
+
+
+```{r message=FALSE}
+options(digits=4)
+workingDir <- getwd()
+dadesDir <-  file.path(workingDir, "dades")
+codeDir <-  file.path(workingDir, "Rcode")
+resultsDir <- file.path(workingDir, "results")
+```
+
+
+```{r include= FALSE}
+installBiocifnot <- function(pckgName){
+  if (!(require(pckgName, character.only = TRUE))) {
+    source("http://Bioconductor.org/biocLite.R")
+    biocLite(pckgName)
+    require(pckgName, character.only = TRUE)
+  }
+}
+# Example 
+# installBiocifnot("CMA")
+
+installifnot <- function(pckgName){
+  if (!(require(pckgName, character.only = TRUE))) {
+    install.packages(pckgName, dep = TRUE)
+    require(pckgName, character.only = TRUE)
+  }
+}
+# Example 
+# installifnot("xlsx")
+
+installGitifnot <- function(pathGit, pckgName, proxy = FALSE, urlproxy = "conf_www.ir.vhebron.net", portproxy = 8081, force.install = FALSE){
+  if (!(require(pckgName, character.only = TRUE)) | force.install) {
+    installifnot("devtools")
+    # require(curl)
+    if (proxy) set_config(use_proxy(url = urlproxy, port = portproxy)) 
+    install_github(file.path(pathGit,pckgName), force = force.install)
+    require(pckgName, character.only = TRUE)
+  }
+}
+# Example 
+# installGitifnot("miriammota","mmotaF",force.install = TRUE)
+```
+
+```{r}
+installifnot("WriteXLS")
+```
+
+```{r message= FALSE}
+source("Rcode/correlationFunctions.R")
+source("Rcode/cmiFunctions.R")
+source("Rcode/gridFunctions.R")
+```
+
+# TRUE and FALSE L-shaped genes
+
+We have selected 90 genes calling them arbitrarily "TRUE" or "FALSE" L-shaped based on visual inspection.
+
+```{r, eval=FALSE}
+# Esta parte se ha hecho una vez
+require(readxl)
+DArangoTrueFalse <- read_excel("dades/DArangoTrueFalse.xls")
+DArangoTrueFalse <- as.data.frame(DArangoTrueFalse)
+TRUELGenes<- !is.na(DArangoTrueFalse$Mostreig_Sistematic) & DArangoTrueFalse$Mostreig_Sistematic=="TRUE"
+trueLGeneNames <- DArangoTrueFalse[TRUELGenes,"Gen"]
+FALSELGenes <- !is.na(DArangoTrueFalse$Mostreig_Sistematic) & DArangoTrueFalse$Mostreig_Sistematic=="FALSE"
+falseLGeneNames <- DArangoTrueFalse[FALSELGenes,"Gen"]
+falseLGeneNames <- c(falseLGeneNames, "ADA", "ANXA13", "BMPER", "DNAJA4", "ELF1", "GRAMD3", "LDHB" )
+write.table(trueLGeneNames, file="dades/genesTrueLNEW.txt", row.names = FALSE, quote=FALSE, col.names = FALSE)
+write.table(falseLGeneNames, file="dades/genesFalseLNEW.txt", row.names = FALSE, quote=FALSE, col.names = FALSE)
+```
+
+After some preprocessing genes have been written to two text files from where they are recovered.
+
+```{r}
+trueLGeneDF <-read.table("dades/genesTrueLNEW.txt")
+(trueLGeneNames <- as.character(trueLGeneDF[,1]))
+falseLGeneDF <- read.table("dades/genesFalseLNEW.txt")
+(falseLGeneNames <- as.character(falseLGeneDF[,1]))
+```
+
+
+The list of FALSE and TRUE L Genes can be confronted with their scores to see up to what point the systems work decently well.
+
+```{r}
+DAscores <- read.csv( file="results/LshapeScoresDA.csv")
+rownames(DAscores) <- DAscores$X
+DAscores<-DAscores[,-1]
+
+trueLScores <- DAscores[rownames(DAscores) %in% trueLGeneNames ,]
+falseLScores <- DAscores[rownames(DAscores) %in% falseLGeneNames ,]
+require(WriteXLS)
+WriteXLS(c("DAscores", "trueLScores", "falseLScores"), ExcelFileName = "results/DAScoresNEW.xls", row.names = TRUE)
+```
+
+
+
+

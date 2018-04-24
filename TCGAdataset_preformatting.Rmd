@@ -1,0 +1,74 @@
+---
+title: "Pre-process datasets from TCGA for methylation studies"
+author: "Berta Miro and Alex Sanchez"
+date: "15 July 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, loadPckgs, echo=FALSE}
+source("https://raw.githubusercontent.com/miriamMota/scripts/master/installifnot.R")
+installGitifnot("miriammota","mmotaF")
+```
+
+```{r irectoris, echo=FALSE, eval=TRUE}
+options(digits=4)
+workingDir <- getwd()
+
+dadesDir <-  file.path(workingDir, "dades")
+codeDir <-  file.path(workingDir, "Rcode")
+graficsDir<-file.path(workingDir, "results")    
+resultsDir <- file.path(workingDir, "results")
+```
+
+This is a dataset from TCGA with samples of Colon Cancer . One advantage of this dataset is that it contains cancer and non-cancer samples. This would allow to select differentially methylated  that may act as a ``check'' for genes potentially regulated by methylation. That is we might expect that differentially methylated genes would tend to have an L-shape more often than others.
+
+A summary of each datasets follows below:
+
+```{r readDataDA, eval=TRUE}
+require(printr)
+TCGAexpr <- read.table(file=file.path(dadesDir,"TCGAexpr.csv"), header=TRUE, sep=",", dec="."
+                       #, row.names = 1
+                       )
+TCGAexpr2 <- TCGAexpr[!duplicated(TCGAexpr$Gene),]
+rownames(TCGAexpr2) <- TCGAexpr2$Gene
+TCGAexpr2$Gene <- NULL
+
+TCGAmet <- read.table(file=file.path(dadesDir,"TCGAmet.csv"), header=TRUE, sep=",",dec="."
+                      #,row.names = 1
+                      )
+TCGAmet2 <- TCGAmet[!duplicated(TCGAmet$Gene),]
+rownames(TCGAmet2) <- TCGAmet2$Gene
+TCGAmet2$Gene <- NULL
+
+#modify colnmames: elim spaces, dots, stresses, etc
+TCGAexpr2 <- re_name(TCGAexpr2)
+TCGAmet2 <- re_name(TCGAmet2)
+
+#Each dataset has different column names, the expr datset has the data 
+names(TCGAexpr2) <-  gsub(pattern = "_Expres.*", replacement = "", x = names(TCGAexpr2))
+names(TCGAmet2) <-  gsub(pattern = "_Methyl.*", replacement = "", x = names(TCGAmet2))
+
+sum(is.na(TCGAmet2))
+sum(is.na(TCGAexpr2))
+
+cat("There are: ", sum(is.na(TCGAmet2)), "empty samples in the TCGA methylation dataset and", sum(is.na(TCGAexpr2)),"in the TCGA expression dataset\n")
+
+TCGAexpr3 <- TCGAexpr2[complete.cases(TCGAexpr2),]
+TCGAmet3 <- TCGAmet2[complete.cases(TCGAmet2),]
+
+TCGAexpr4 <- TCGAexpr3[rownames(TCGAexpr3) %in% rownames(TCGAmet3),]
+TCGAmet4 <- TCGAmet3[rownames(TCGAmet3) %in% rownames(TCGAexpr4),]
+
+TCGAExprData <- TCGAexpr4
+TCGAMetilData <- as.matrix(TCGAmet4)
+
+cat("TCGA Microarray data : ", dim(TCGAExprData), "\n")
+cat("TCGA Methylation data: ", dim(TCGAMetilData), "\n")
+
+write.csv(TCGAexpr4, "dades/TCGAExprData.csv")
+write.csv(TCGAMetilData, "dades/TCGAMetilData.csv")
+```

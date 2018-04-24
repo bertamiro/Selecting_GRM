@@ -1,0 +1,18 @@
+Downloadng data ... 
+Searching 27k MET data for: COAD 
+	Downloading Merge_methylation__humanmethylation27 data, version: 20160128 
+	This may take 10-60 minutes depending on the size of the data set.
+	Unpacking data.
+	Finished downloading Merge_methylation__humanmethylation27 data to /home/ueb/EstudisEnCurs/2017-01-Selecting_GRM/dades/gdac_20160128/gdac.broadinstitute.org_COAD.Merge_methylation__humanmethylation27__jhu_usc_edu__Level_3__within_bioassay_data_set_function__data.Level_3.2016012800.0.0 
+Searching 450k MET data for: COAD 
+	Downloading Merge_methylation__humanmethylation450 data, version: 20160128 
+	This may take 10-60 minutes depending on the size of the data set.
+	Unpacking data.
+	Finished downloading Merge_methylation__humanmethylation450 data to /home/ueb/EstudisEnCurs/2017-01-Selecting_GRM/dades/gdac_20160128/gdac.broadinstitute.org_COAD.Merge_methylation__humanmethylation450__jhu_usc_edu__Level_3__within_bioassay_data_set_function__data.Level_3.2016012800.0.0 
+$METdirectory27k
+[1] "/home/ueb/EstudisEnCurs/2017-01-Selecting_GRM/dades/gdac_20160128/gdac.broadinstitute.org_COAD.Merge_methylation__humanmethylation27__jhu_usc_edu__Level_3__within_bioassay_data_set_function__data.Level_3.2016012800.0.0/"
+
+$METdirectory450k
+[1] "/home/ueb/EstudisEnCurs/2017-01-Selecting_GRM/dades/gdac_20160128/gdac.broadinstitute.org_COAD.Merge_methylation__humanmethylation450__jhu_usc_edu__Level_3__within_bioassay_data_set_function__data.Level_3.2016012800.0.0/"
+
+Processing methylation data...  

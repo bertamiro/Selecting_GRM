@@ -1,0 +1,326 @@
+% !Rnw weave = knitr
+
+\documentclass{article}
+
+\usepackage{underscore}
+
+\title{R functions implemented for the analysis of the relation between expression values and pharmacological variables}
+\author{M. Carme Ru\'iz de Villa and Alex S\'anchez. Statistics department. UB}
+
+\begin{document}
+
+<<include=FALSE, eval=FALSE>>=
+opts_chunk$set(concordance=TRUE, cache=FALSE)
+@
+
+
+\maketitle
+\tableofcontents
+
+
+\section{Correlation functions}
+
+<<correlationFunction2Apply, eval=TRUE>>=
+require(Hmisc)
+myCor2 <- function (x, covariate){
+  cors <- rcorr(covariate, x, type="spearman")
+  return(unlist(list(r=cors$r[1,2], p=cors$P[1,2])))
+}
+@ 
+
+<<computeCorrelations>>=
+computeCors <- function (Dades, covariate, showNumGenes=TRUE){
+    myCors <- apply (Dades, 1, myCor2, covariate)
+    myCors <- t(myCors)
+    orderedCors <- myCors[order(myCors[,"p"]),]
+    require(multtest)
+    adjP <- (mt.rawp2adjp(orderedCors[,"p"], "BH"))$adjp
+    allCors <- cbind(orderedCors,adjP)
+    allCors <- allCors[,-3]
+    if(showNumGenes){
+     numGenesLT005 <- sum(allCors[,"BH"] < 0.05)
+     numGenesLT010 <- sum(allCors[,"BH"] < 0.10)
+     numGenesLT025 <- sum(allCors[,"BH"] < 0.25)
+     numGenesLT050 <- sum(allCors[,"BH"] < 0.50)
+     cat("Number of genes with adj-pval < 0.05: ", numGenesLT005, "\n")
+     cat("Number of genes with adj-pval < 0.10: ", numGenesLT010, "\n")
+     cat("Number of genes with adj-pval < 0.25: ", numGenesLT025, "\n")
+     cat("Number of genes with adj-pval < 0.50: ", numGenesLT050, "\n")
+   }
+   return(allCors)
+}
+@ 
+
+Function \texttt{computeCors} can be applied to find features highly correlated with any covariate.
+Function \texttt{SplitAndPlot} can be applied to plot the  features highly correlated with any covariate.
+
+This has to be applied first to all samples and then to the two subsets defined by the tumor types MSS and MSI so a new function is created to simplify this process. The function will also take charge of removing samples that do not have the covariate value.
+
+<<splitGroupsAndComputeCors>>=
+splitAndComputeCors <- function (eset, covName, showNumGenes=TRUE, outFName, type="mRNA"){
+  # Expressions and covariate
+  expres <- exprs(eset)
+  covariate <- pData(eset)[,covName]
+  # Remove NAs
+  withValues<- which(!is.na(covariate))
+  Expres2 <- expres[,withValues]
+  covariate2 <- covariate[withValues]
+  targets2 <- pData(eset)[withValues,]
+  # Split by groups
+  Expres_MSS<-Expres2[,as.character(targets2$Grupo)=="MSS"]
+  covariate_MSS <-covariate2[as.character(targets2$Grupo)=="MSS"]
+  Expres_MSI<-Expres2[,as.character(targets2$Grupo)=="MSI"]
+  covariate_MSI <-covariate2[as.character(targets2$Grupo)=="MSI"]
+  # Computations
+  cat("\nCorrelation Analysis for ", covName, "\n")
+  cat("Correlation between Expression values and ", covName, " for all samples\n")
+  allCors <- computeCors(Expres2, covariate2, showNumGenes)
+  cat("Correlation between Expression values and ", covName, " for MSS samples\n")
+  MSSCors<- computeCors(Expres_MSS, covariate_MSS, showNumGenes)
+  cat("Correlation between Expression values and ", covName, " for MSI samples\n")
+  MSICors<- computeCors(Expres_MSI, covariate_MSI, showNumGenes)
+  if (type=="mRNA"){
+    require(annotate);require(hgu133plus2.db)
+    gSymbols <-getSYMBOL(rownames(allCors[order(rownames(allCors)),]), data="hgu133plus2.db")
+  }else{
+    gSymbols<- rownames(allCors[order(rownames(allCors)),])
+  }
+  combinedCors<-data.frame(gSymbols,
+                      allCors[order(rownames(allCors)),],
+                      MSSCors[order(rownames(MSSCors)),],
+                      MSICors[order(rownames(MSICors)),])
+  colnames(combinedCors) <- c("Gene",
+                              paste(rep(c("r", "p", "BH"), 3), 
+                                    c(rep("all",3), rep("MSS", 3), rep("MSI", 3)), sep="."))
+  write.csv2(combinedCors, outFName,row.names=FALSE) 
+  return(corrs=list(allCors, MSSCors, MSICors,combinedCors ))
+}
+@ 
+
+<<splitAndPlot>>=
+splitAndPlot <- function (eset, covName, ListCors, outFName, 
+                          perc2plot=0.25, type="mRNA",
+                          addSplines=TRUE, grauSpline=4){
+  # Expressions and covariate
+  expres <- exprs(eset)
+  covariate <- pData(eset)[,covName]
+  # Remove NAs
+  withValues<- which(!is.na(covariate))
+  Expres2 <- expres[,withValues]
+  covariate2 <- covariate[withValues]
+  targets2 <- pData(eset)[withValues,]
+  # Split by groups
+  Expres_MSS<-Expres2[,as.character(targets2$Grupo)=="MSS"]
+  covariate_MSS <-covariate2[as.character(targets2$Grupo)=="MSS"]
+  Expres_MSI<-Expres2[,as.character(targets2$Grupo)=="MSI"]
+  covariate_MSI <-covariate2[as.character(targets2$Grupo)=="MSI"]
+  
+  Cors<-ListCors[[1]]##all the groups
+  CorsMSS<-ListCors[[2]]
+  CorsMSI<-ListCors[[3]]
+  n1<- sum(Cors[,"BH"] < quantile(Cors[,"BH"], perc2plot)) 
+  n2<- sum(CorsMSS[,"BH"] < quantile(CorsMSS[,"BH"], perc2plot)) 
+  n3<- sum(CorsMSI[,"BH"] < quantile(CorsMSI[,"BH"], perc2plot)) 
+#seleccio dels gens per fer el grafic
+  gens<- rownames(Cors)[1:n1]
+  gensMSS <- rownames(CorsMSS)[1:n2]
+  gensMSI <- rownames(CorsMSI)[1:n3]
+  allGenes <- union(gens, union(gensMSS, gensMSI))
+  #length(allGenes)
+#selecio de les correlacions i les expressions d'aquests gens
+  allCors2plot <- Cors[allGenes,]
+  allCors2plot <- allCors2plot[order(allCors2plot[,"p"]),]
+  allCors_MSS2plot <- CorsMSS[allGenes,]
+  allCors_MSS2plot <- allCors_MSS2plot[order(allCors2plot[,"p"]),]
+  allCors_MSI2plot <- CorsMSI[allGenes,]
+  allCors_MSI2plot <- allCors_MSI2plot[order(allCors2plot[,"p"]),]
+
+  Expres2plot <- Expres2[allGenes,]
+  Expres2plot <- Expres2plot[order(allCors2plot[,"p"]),]
+  Expres_MSS2plot <- Expres_MSS[allGenes,]
+  Expres_MSS2plot <- Expres_MSS2plot[order(allCors2plot[,"p"]),]
+  Expres_MSI2plot <- Expres_MSI[allGenes,]
+  Expres_MSI2plot <- Expres_MSI2plot[order(allCors2plot[,"p"]),]
+#
+# Anotacio dels probesets.
+# Té sentit fer-ho amb elmicroarrays, no amb microRNA o metilacio
+#
+  if(type=="mRNA"){
+    require(annotate);require(hgu133plus2.db)
+    gSymbols <-getSYMBOL(rownames(Expres2plot), data="hgu133plus2.db")
+  }else{
+    gSymbols <-rownames(Expres2plot)
+  }
+  
+#plot
+  etiq <-1:ncol(Expres2plot)
+  etiqMSS <- etiq [as.character(targets2$Grupo)=="MSS"] 
+  etiqMSI <- etiq [as.character(targets2$Grupo)=="MSI"] 
+  pix <- ifelse(targets2$Grupo =="MSS", 1, 2)
+  pixMSS <- 1
+  pixMSI <- 2
+  ymin <- min (covariate2)
+  ymax <- max(covariate2)
+  ymax <- ymax+(ymax-ymin)/4
+  pdf(file=file.path(resultsDir, outFName))
+  par(mfrow=c(3,1))
+  
+  for(i in 1:length(allGenes)){
+        idx <- rownames(allCors2plot)[i]
+### Totes les mostres
+        x1 <- Expres2plot[idx,]
+        xmin<- min(x1)
+        xmax<- max(x1)
+        rS <- round(allCors2plot[idx,"r"], 3)
+        adjPval <- round(allCors2plot[idx,"BH"], 5)
+        gName <- gSymbols[idx]
+        titol <- paste (gName, "Corr=", rS, "adjP=", adjPval)
+        plot(x1, covariate2, main=titol, type="p", pch=pix,
+             xlab="Expr", ylab= covName, 
+             xlim=c(xmin, xmax), ylim=c(ymin, ymax))
+        text(x1, covariate2, etiq, cex=.6, pos=4)
+        if (addSplines){
+             lines(predict(smooth.spline(x1,covariate2, df=grauSpline), 
+                           x=seq(xmin, xmax, length=20)),col="red",lwd=2)
+        }
+### Mostres MSS
+        x1 <- Expres_MSS2plot[idx,]
+        
+        rSMSS <- round(allCors_MSS2plot[idx,"r"], 3)
+        adjPvalMSS <- round(allCors_MSS2plot[idx,"BH"], 5)
+        titol <- paste (gName,"(MSS)", "Corr=", rSMSS, "adjP=", adjPvalMSS)
+        plot(x1, covariate_MSS, main=titol, type="p", pch=pixMSS,
+             xlab="Expr", ylab= covName, 
+             xlim=c(xmin, xmax), ylim=c(ymin, ymax))
+        text(x1, covariate_MSS, etiqMSS, cex=.6, pos=4)
+        if (addSplines){
+             lines(predict(smooth.spline(x1,covariate2, df=grauSpline), 
+                           x=seq(xmin, xmax, length=20)),col="red",lwd=2)
+        }
+  ### Mostres MSI
+        x1 <- Expres_MSI2plot[idx,]
+        
+        rSMSI <- round(allCors_MSI2plot[idx,"r"], 3)
+        adjPvalMSI <- round(allCors_MSI2plot[idx,"BH"], 5)
+        titol <- paste (gName,"(MSI)", "Corr=", rSMSI, "adjP=", adjPvalMSI)
+        plot(x1, covariate_MSI, main=titol, type="p", pch=pixMSI,
+             xlab="Expr", ylab= covName,  
+             xlim=c(xmin, xmax), ylim=c(ymin, ymax))
+        text(x1, covariate_MSI, etiqMSI, cex=.6, pos=4) 
+         if (addSplines){
+             lines(predict(smooth.spline(x1,covariate2, df=grauSpline), 
+                           x=seq(xmin, xmax, length=20)),col="red",lwd=2)
+        }
+  } 
+ dev.off()
+}
+
+@
+
+
+\section{Cross-validation functions}
+
+In order to assess if the ``most correlated'' features are good biomarker candidate we have performed a leave one out cross validation as follows
+
+\begin{itemize}
+\item For each sample $i$ in in 1...30:
+  \begin{itemize}
+  \item Remove sample $i$
+  \item Perform the correlation analysis and select features whose significance for correlation is below a predefined threshold
+  \item Count how many times each gene is selcted. keep features selected above a threshold.
+  \end{itemize}
+\end{itemize}
+
+<<ValidationLOO >>=
+ValidationLOO <- function(eset, covName, showNumGenes=FALSE, 
+                          maxGenes2Select=400, cutOff=0.05)
+{
+    expres <- exprs(eset)
+    covariate <- pData(eset)[,covName]
+    # Remove NAs
+    withValues<- which(!is.na(covariate))
+    Expres2 <- expres[,withValues]
+    covariate2 <- covariate[withValues]
+    targets2 <- pData(eset)[withValues,]  
+    covariateLOO <- NULL
+    nruns<-ncol(Expres2)
+    GenesLOO<-matrix("NA", nrow=nruns, ncol= maxGenes2Select)
+    for (i in 1:nruns)
+    {
+        DadesLOO<-Expres2[,-i]
+        covariateLOO<-covariate2[-i]
+        allCorsLOO <- computeCors(DadesLOO, covariateLOO,showNumGenes)
+        selectedCors <- allCorsLOO[allCorsLOO[,"BH"] < cutOff,]
+        if (nrow(selectedCors) > 0){
+            selectedGenes <- DadesLOO[rownames(selectedCors),]
+            symbols<- getSYMBOL (rownames(selectedCors), "hgu133plus2")
+            ngenes<-nrow(selectedCors)
+            if (ngenes <=maxGenes2Select) 
+                {GenesLOO[i,1:ngenes] <-symbols
+             }else{
+                 GenesLOO[i,]<-symbols[1:maxGenes2Select]
+             }
+          }
+    }
+   return(GenesLOO)
+}
+@ 
+
+Again this has to be applied first to all samples and then to the two subsets defined by the tumor types MSS and MSI so a new function is created to simplify this process. The function will also take charge of removing samples that do not have the covariate value.
+
+<<splitAndLOO>>=
+splitAndLOO  <- function(eset, covName, showNumGenes=FALSE, 
+                          maxGenes2Select=400, cutOff=0.05)
+{
+    expres <- exprs(eset)
+    covariate <- pData(eset)[, covName]
+    # Remove NAs
+    withValues<- which(!is.na(covariate))
+    ExpresAll <- expres[, withValues]
+    covariateAll <- covariate[withValues]
+    targetsAll <- pData(eset)[withValues,]  
+    # Split by groups
+    Expres_MSS <- ExpresAll[,as.character(targetsAll$Grupo)=="MSS"]
+    covariate_MSS <- covariateAll[as.character(targetsAll$Grupo)=="MSS"]
+    Expres_MSI <- ExpresAll[, as.character(targetsAll$Grupo)=="MSI"]
+    covariate_MSI <- covariateAll[as.character(targetsAll$Grupo)=="MSI"] 
+    # List of expression matrices
+    lExpress <- list(ExpresAll=ExpresAll, 
+                     ExpresMSS=Expres_MSS, 
+                     ExpresMSI=Expres_MSI)
+    lCovs <- list (covAll = covariateAll, 
+                   covMSS = covariate_MSS, 
+                   covMSI = covariate_MSI)
+    lGenesLOO <- list ()
+    # Crossvalidation
+    for (j in 1:3){
+        covariateLOO <- NULL
+        Expres2 <- lExpress[[j]]
+        covariate2 <- lCovs[[j]]
+        nruns<-ncol(Expres2)
+        GenesLOO <-matrix("NA", nrow=nruns, ncol= maxGenes2Select)
+        for (i in 1:nruns)
+            {
+                DadesLOO <-Expres2[,-i]
+                covariateLOO <- covariate2[-i]
+                allCorsLOO <- computeCors(DadesLOO, covariateLOO, showNumGenes)
+                selectedCors <- allCorsLOO[allCorsLOO[,"BH"] < cutOff,]
+                if (nrow(selectedCors) > 0){
+                    selectedGenes <- DadesLOO[rownames(selectedCors),]
+                    symbols<- getSYMBOL (rownames(selectedCors), "hgu133plus2")
+                    ngenes<-nrow(selectedCors)
+                if (ngenes <= maxGenes2Select) 
+                    {GenesLOO[i,1:ngenes] <-symbols
+                 }else{
+                     GenesLOO[i,]<-symbols[1:maxGenes2Select]
+                 }
+                }
+            }
+        lGenesLOO[[i]]=GenesLOO
+    }
+    return(lGenesLOO)
+}
+@ 
+
+
+\end{document}

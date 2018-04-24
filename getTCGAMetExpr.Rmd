@@ -1,0 +1,269 @@
+---
+title: "getting TCGA COAD Methylation and Expression data from cBioportal"
+output:
+  html_document:
+    theme: lumen
+  toc: yes
+---
+
+# Introduction
+
+The analysis of L shaped genes performed elsewhere ("Informe_v12.2_L-Shape_Selection_Pipeline.Rnw") has used data obtained from TCGA and provided by the researcher.
+
+These data have shown a surprisingly low number of L-shaped genes when they have been processed with the _heuristic_ algorithm. Before reviewing the algorithm or its parameters we have wanted to check if the data have been properly processed.
+
+With this aim in mind we have obtained the data from the cBioportal and processed them in a `reasonable' way.
+
+```{r}
+source("Rcode/usefulFunctions.R")
+```
+
+
+# Obtaining the data
+
+The datasets have been downloaded from the cBioportal web site and consist of the "tumor-only" data from the Nature 2012 study.
+
+## Expression data
+
+```{r}
+x<- data_expression_merged_median_Zscores <- read.delim("dades/gdac.20160128.cBioportal/coadread_tcga_pub/data_expression_merged_median_Zscores.txt",sep="\t", head = TRUE)
+DimMat(x, "Expression data")
+```
+
+The first column contains Entrez identifiers which may be used (if unique) as row names. However it also contains miRNA identifiers ("hsa-*") showing that the last rows are not gene expression but microRNAs expression values. These are removed from the dataset
+
+```{r}
+sum(duplicated(x$Entrez_Gene_Id))
+rownames(x) <- expresEntrez<- x$Entrez_Gene_Id
+if(ncol(x)==225) x<- x[,-1]
+miRNAs <- grep("hsa-*", rownames(x))
+x <- x[-miRNAs,]
+DimMat(x)
+```
+
+Entrez identifiers are good for indexing but may be confusing as row names, and they are not informative about the gene. They are converted into HuGO symbols.
+
+```{r, message=FALSE}
+require(Homo.sapiens)
+anotacs<- select(Homo.sapiens, keys=rownames(x), columns= "SYMBOL", keytype="ENTREZID")
+DimMat(anotacs, "Entrez and HuGO identifiers",2)
+```
+
+Some Entrezs are not associated with gene symbols. 
+```{r}
+ head(anotacs[is.na(anotacs[,2]),])
+```
+
+These genes are removed and then the remaining gene symbols (uniquely associated with Entrez Ids) are used as rownames. before doing the assignment NAs are removed from the Symbols list.
+
+```{r}
+Entrez_without_Symbol<- is.na(anotacs[,2]) 
+x<- x[!Entrez_without_Symbol,]
+anotacs<- anotacs[!Entrez_without_Symbol,]
+rownames(x) <-anotacs[,2] 
+DimMat(x)
+```
+
+The resulting matrix has many genes with all values set to NA and a few genes with a few NAs. Genes with more than 75% NAs are removed.
+
+```{r}
+quantsNAs_x <- countNAs(x)
+table(quantsNAs_x)
+maxNAs <- floor(0.75*dim(x)[2])
+genes2Remove <- names(quantsNAs_x [quantsNAs_x > maxNAs])
+expres2Keep <- x[setdiff(rownames(x),genes2Remove),]
+dim(expres2Keep)
+save(expres2Keep, file="TCGA-COAD-expressions0.Rda")
+```
+
+## Methylation Data
+
+Methylation data are processed similarly
+
+```{r}
+y <- data_methylation_hm27 <- read.delim("dades/gdac.20160128.cBioportal/coadread_tcga_pub/data_methylation_hm27.txt", sep="\t", head = TRUE)
+DimMat(y)
+```
+Check that each gene has a unique entrez or gene symbol associated, alternatively remove duplicates.
+
+```{r}
+sum(duplicated(y$Entrez_Gene_Id))
+sum(duplicated(y$Hugo_Symbol))
+y <- y[!duplicated(y$Entrez_Gene_Id),]
+dim(y)
+y <- y[!is.na(y$Entrez_Gene_Id),]
+dim(y)
+# Al no estar duplicats els symbols tampoc ho estan els Entrez
+y <- y[!duplicated(y$Hugo_Symbol),]
+y <- y[!is.na(y$Hugo_Symbol),]
+dim(y)
+```
+
+Instead of relying on the provided HuGO symbols table Entrezs are converted again into Gene Symbols to avoid problems due to synonims.
+
+```{r, message=FALSE}
+require(Homo.sapiens)
+anotacs<- select(Homo.sapiens, keys=y$Entrez_Gene_Id, columns= "SYMBOL", keytype="ENTREZID")
+DimMat(anotacs, "Entrez and HuGO identifiers",2)
+simbolsNotEqual <- length(setdiff(y$Hugo_Symbol,anotacs[,2]))
+
+```
+There are \Sexpr{simbolsNotEqual} that differ between the original symbols and those derived from bioconductor annotations. We retain the last ones to make them comparable ("matchable") with those obtained for gene expressions, where only Entrez ids were provided.
+
+```{r}
+Entrez_without_Symbol<- is.na(anotacs[,2]) 
+y<- y[!Entrez_without_Symbol,]
+anotacs<- anotacs[!Entrez_without_Symbol,]
+rownames(y) <-anotacs[,2] 
+length(setdiff(rownames(y), y$Hugo_Symbol))
+if(ncol(y)==238) y <- y[,-c(1:2)]
+DimMat(y)
+```
+
+The resulting matrix has many genes with all values set to NA and a few genes with a few NAs. Genes with more than 75% NAs are removed.
+
+```{r}
+quantsNAs_y <- countNAs(as.matrix(y))
+table(quantsNAs_y)
+maxNAs <- floor(0.75*dim(y)[2])
+mets2Remove <- names(quantsNAs_y [quantsNAs_y > maxNAs])
+mets2Keep <- y[setdiff(rownames(y),mets2Remove),]
+dim(mets2Keep)
+save(mets2Keep, file="TCGA-COAD-methylations0.Rda")
+```
+
+# Matching gene expression and methylation values
+
+In order to make it possible to associate expression and methylation data we keep only common genes and common samples between the two datasets and sort genes and samples aplphabetically.
+
+```{r}
+commonGenes <- intersect(rownames(expres2Keep), rownames(mets2Keep))
+length(commonGenes)
+commonExpres <- expres2Keep[commonGenes,]
+commonMets <- mets2Keep[commonGenes,]
+commonSamples <- intersect(colnames(commonExpres), colnames(commonMets))
+length(commonSamples)
+commonExpres <- commonExpres[,commonSamples]
+commonMets <- commonMets[, commonSamples]
+commonExpres <- commonExpres[order(rownames(commonExpres)),]
+commonMets <- commonMets[order(rownames(commonMets)),]
+
+sum(colnames(commonMets)==colnames(commonExpres))
+sum(rownames(commonMets)==rownames(commonExpres))
+
+```
+
+## Missing values imputation in matched datasets
+
+Some calculations do not allow missing values but there are a few left.
+
+```{r}
+# revisem els NAs
+quantsNAs_expr <- countNAs(commonExpres)
+table(quantsNAs_expr)
+quantsNAs_mets <- countNAs(commonMets)
+table(quantsNAs_mets)
+```
+
+Given that the number of missings is very small we decide to impute them using a kNN approach.
+
+```{r, message=FALSE}
+# Com son pocs podem imputar-los
+require(impute)
+set.seed(123456)
+imputed.commonExpressions <- impute.knn(as.matrix(commonExpres))
+commonExpressions <- imputed.commonExpressions [["data"]]
+DimMat(commonExpressions, "TCGA Microarray data (font cBioportal) : ")
+set.seed(123456)
+imputed.commonMethylations <- impute.knn(as.matrix(commonMets))
+commonMethylations <- imputed.commonMethylations[["data"]]
+DimMat(commonMethylations,"TCGA Methylation data (font cBioportal) : ")
+save (commonExpressions, file="dades/TCGA-cBioPortal-Expressions.Rda")
+save (commonMethylations, file="dades/TCGA-cBioPortal-Methylations.Rda")
+```
+
+```{r}
+if (!exists("commonExpressions")) load(file="dades/TCGA-cBioPortal-Expressions.Rda")
+if (!exists("commonMethylations")) load(file="dades/TCGA-cBioPortal-Methylations.Rda")
+write.csv(commonExpressions, file="dades/TCGA-cBioPortal-Expressions.csv", row.names = TRUE, quote=FALSE)
+write.csv(commonMethylations, file="dades/TCGA-cBioPortal-Methylations.csv", row.names = TRUE, quote=FALSE)
+```
+
+## Comparing data with values provided by the researcher
+
+A previous version of these data had been provided by the researcher
+
+```{r}
+TCGAExprData <-  as.matrix(read.table(file="dades/TCGAExprData.csv", header=TRUE, sep=",", dec=".", row.names=1))
+TCGAMetilData <-  as.matrix(read.csv(file="dades/TCGAMetilData.csv", header=TRUE, sep=",", dec=".", row.names=1))
+DimMat(TCGAExprData,  "TCGA Microarray data (DA) : ")
+DimMat(commonExpressions, "TCGA Microarray data (font cBioportal) : ")
+DimMat(TCGAMetilData, "TCGA Methylation data (DA): ")
+DimMat(commonMethylations,"TCGA Methylation data (font cBioportal) : ")
+```
+
+In order to make them comparable, commonExpressions and commonMetilations column names are renamed to match the others' datasets
+
+```{r}
+colnames(commonExpressions) <- paste("TC", substr(colnames(commonExpressions), 9,12), sep="_")
+colnames(commonMethylations) <- paste("TC", substr(colnames(commonMethylations), 9,12), sep="_")
+length(intersect(colnames(commonExpressions), colnames(TCGAExprData)))
+length(intersect(rownames(commonExpressions), rownames(TCGAExprData)))
+```
+
+Datasets can be plotted (via PCA) to look for potential batch effects
+
+```{r}
+source("https://raw.githubusercontent.com/alexsanchezpla/usefulFunctions/master/plotPCA2.R")
+```
+
+```{r}
+opt<- par(mfrow=c(2,1))
+plotPCA2(commonExpressions, scale=TRUE, transpose=TRUE, dataDesc = "Expression data from cBioportal" )
+plotPCA2(TCGAExprData, scale=TRUE, transpose=TRUE, dataDesc = "Expression data from DA" )
+par(opt)
+```
+
+```{r}
+opt<- par(mfrow=c(2,1))
+plotPCA2(commonMethylations, scale=FALSE, transpose=TRUE, dataDesc = "Methylation data from cBioportal" )
+plotPCA2(TCGAMetilData, scale=FALSE, transpose=TRUE, dataDesc = "Methylation data from DA" )
+par(opt)
+
+```
+The distributions can also be compared using boxplots
+
+```{r}
+minY<- min(min(commonExpressions),min(TCGAExprData))
+maxY <- max(max(commonExpressions),max(TCGAExprData))
+opt<- par(mfrow=c(2,1))
+boxplot(as.data.frame(commonExpressions), las=2, main = "Expression data from cBioportal", ylim=c(minY, maxY), cex.axis=0.4 )
+boxplot(as.data.frame(TCGAExprData), las=2, main  = "Expression data from DA", ylim=c(minY, maxY),  cex.axis=0.4 )
+par(opt)
+```
+
+
+```{r}
+minY<- min(min(commonMethylations),min(TCGAMetilData))
+maxY <- max(max(commonMethylations),max(TCGAMetilData))
+opt<- par(mfrow=c(2,1))
+boxplot(as.data.frame(commonMethylations), las=2, main = "Methylation data from cBioportal", ylim=c(minY, maxY), cex.axis=0.4 )
+boxplot(as.data.frame(TCGAMetilData), las=2, main  = "Methylation data from DA", ylim=c(minY, maxY),  cex.axis=0.4 )
+par(opt)
+```
+
+```{r}
+opt<- par(mfrow=c(2,1))
+plotPCA2(commonMethylations, scale=FALSE, transpose=TRUE, dataDesc = "Methylation data from cBioportal" )
+plotPCA2(TCGAMetilData, scale=FALSE, transpose=TRUE, dataDesc = "Methylation data from DA" )
+par(opt)
+
+```
+
+
+```{r}
+opt<- par(mfrow=c(2,1))
+plot(density(commonMethylations), main= "Methylation data from cBioportal" )
+plot(density(TCGAMetilData),"Methylation data from DA" )
+par(opt)
+```

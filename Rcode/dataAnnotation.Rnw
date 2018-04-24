@@ -1,0 +1,47 @@
+\subsubsection{Data annotation}
+
+Notice that, although gene symbols have been used for identifying
+genes, each gene is uniquely determined by its name in this dataset
+(there are no repeated rows). In consequence it is straightforward to
+access other gene identifiers such as the \texttt{Entrez Id}, which
+may be required for further analyses such as Gene Enrichment Analysis,
+or \texttt{chromosome locations} which are needed to study the distribution of
+methylation genes in the genome.
+
+<<getEntrezIDs, eval=TRUE>>=
+  require(Homo.sapiens)
+
+#symbol and Entrez
+anotacs<- select(Homo.sapiens, keys=geneSymbols, 
+                 columns="ENTREZID", keytype="SYMBOL")
+
+#symbol and transcript location
+transcriptCoords1<- transcripts(Homo.sapiens, columns = c('TXNAME', 'SYMBOL','ENTREZID', 'TXID', 'TXCHROM', 'TXSTART', 'TXEND'))
+transcriptCoords2 <- select(TxDb.Hsapiens.UCSC.hg19.knownGene,
+                            keys = anotacs$ENTREZID,
+                            columns=c('GENEID', 'TXNAME', 'TXID', 'TXCHROM', 'TXSTART', 'TXEND' ),
+                            keytype="GENEID")            
+names(transcriptCoords2) <- c('ENTREZID', 'TXNAME', 'TXID', 'TXCHROM', 'TXSTART', 'TXEND')
+anotacs2<- merge(anotacs, transcriptCoords2, 'ENTREZID')
+anotacs3 <- anotacs2[!duplicated(anotacs2$ENTREZID),]
+anotacs3 <- anotacs3[order(anotacs3$TXSTART), ]
+@ 
+  
+  Below it is shown how the annotations look like for the first genes
+<<showAnots>>=
+  head(transcriptCoords1)
+head(anotacs3)
+@  
+  
+  Scaled data have been stored into a binary (.Rdata) data file
+(\verb|DataNet.RData|) so that they can be easily recovered for
+further analyses. They have also been saved into a .csv file ((\verb|DataNet.csv|)) for
+eventual use in other programs.
+
+<<saveData, eval=TRUE, echo=FALSE>>=
+  write.csv(Dades, file=file.path(dadesDir, "DataNet.csv"), quote=F, row.names=F) 
+write.csv(anotacs3, file=file.path(resultsDir, "anotacsTranscripts.csv"), quote=F, row.names=F) 
+write.csv(anotacs, file=file.path(resultsDir, "anotacsGenes.csv"), quote=F, row.names=F) 
+save(Dades, anotacs3, transcriptCoords1, file=file.path(resultsDir, "DataNet.RData"))
+@
+  

@@ -1,0 +1,13 @@
+erase *.bak
+erase *.aux
+erase *.log
+erase *.lof
+erase *.lot
+erase *.lol
+erase *.bbl
+erase *.blg
+erase *.dvi
+erase *.toc
+erase *.nav
+erase *.out
+erase *.snm

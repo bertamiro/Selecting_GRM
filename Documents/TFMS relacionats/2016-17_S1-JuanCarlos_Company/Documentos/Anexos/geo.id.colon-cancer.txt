@@ -1,0 +1,26 @@
+Type	Description	GEOid
+EXP 	Apelin, a novel predictive biomarker for bevacizumab response in colorectal cancer	GSE89287
+EXP 	TFIIS.h, a new target of p53, regulates transcription efficiency of pro-apoptotic bax gene	GSE77669
+EXP 	SPROUTY2 target genes in human colon carcinoma cells	GSE56941
+EXP 	ERbeta modulation of NFkB pathway in colon cancer cell lines SW480 and HT29	GSE65979
+EXP 	Gene expression profiles of HT29 cells in which REG4 expression was suppressed	GSE62318
+EXP 	Medullary Carcinoma of the colon 	GSE76855
+EXP 	Silcening RAC1 expression suppresses the proliferation of colon cancer cells by inducing gene differentially expressed 	GSE78093
+EXP 	Expression data at each site in colon cancer 	GSE65480
+EXP 	LATS2 regulated genes in human colon cancer cell line 	GSE51715
+EXP 	AKT Inhibition Promotes Non-autonomous Cancer Cell Survival 	GSE71901
+EXP 	Gene expression profiling of human colon cancer cell lines stimulated with dsDNA90 	GSE75205
+EXP 	Altering cancer transcriptomes using epigenomic inhibitors 	GSE63776
+EXP 	Gene expression profiling study by RNA-seq in colorectal cancer 	GSE50760
+METH	Immune regulation by low doses of the DNA methyltransferase inhibitor 5-azacitidine in common human epithelial cancers	GSE57342
+METH 	Direct ChIP-bisulfite sequencing reveals a role of H3K27me3 mediating aberrant hypermethylation of promoter CpG islands in cancer cells (RNA-seq) 	GSE43093
+METH 	TET-catalyzed 5-hydroxymethylcytosine regulates gene expression in differentiating colonocytes and colon cancer 	GSE69333
+METH 	Colon cancer profiling 	GSE2138
+METH 	Differential methylation profiling of colon tumors 	GSE21181
+METH 	A DNA Methylation Fingerprint of 1,628 Human Samples	GSE28094
+METH 	Anti-cancer drug sensitive DNA methylation marker research	GSE27130
+METH 	DNA Methylation Biomarkers for Noninvasive Diagnosis of Colorectal Cancer 	GSE43369
+METH 	DNA methylation differences between multiple sclerosis and controls in frontal lobe white matter	GSE40360
+METH 	5-hydroxymethylcytosine marks promoters in colon that resist hypermethylation in cancer [Methylation450 Array]	GSE63421
+METH 	5-hydroxymethylcytosine marks promoters in colon that resist hypermethylation in cancer 	GSE47592
+METH 	DNA methylation profiling in colon cancer 	GSE39334

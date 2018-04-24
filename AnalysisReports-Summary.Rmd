@@ -1,0 +1,240 @@
+---
+title: "Resumen de los análisis llevados a cabo para buscar genes regulados por metilación"
+output:
+  html_document:
+    theme: united
+    toc: yes
+---
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(fig.width = 12, fig.height = 8, cache = FALSE,
+                      echo = FALSE, warning = FALSE, message = FALSE)
+```
+
+# Introducción
+
+Este documento contiene un breve resumen de los análisis realizados con los datos proporcionados, así como con datos publicos obtenidos de GEO y TCGA para encontrar genes regulados por metilación.
+
+Los análisis se describen con mayor detalle en otros documentos como
+
+- [AnalysisReport-1_HeuristicMethod.pdf](AnalysisReport-1_HeuristicMethod.pdf) centrado en el método heurístico y
+- [AnalysisReport-2-L-Shape_Selection_Pipeline.pdf](AnalysisReport-2-L-Shape_Selection_Pipeline.pdf) centrado en el proceso de análisis de principio a fin usando tres métodos distintos que se describen a continuación.
+
+Los métodos utilizados para seleccionar genes en L han sido:
+
+-  __Naive__ que selecciona genes con correlacion (entre expresión y metilación) negativa, significativamente inferior a cero y un valor del coeficiente de correlación (de Spearman o Pearson) inferior a un valor arbitrario. 
+-  __CMI__ que selecciona los genes cuya información mutua condicional alcanza un valor mínimo entre 0 y 1, también prefijado.
+-  __Heurístico__ que selecciona los genes utilizando un criterio empírico basada en superponer una gradilla de 3 por 3 cuadrados sobre el gráfico de metilación-expresión. Si éste tiene forma de L tendrá puntos en los extremos de la diagonal izquierda (1,1) y (3,3) y no los tendrá en el extremo superior derecho (1,3). Estos criterios sirven para separar los que tienen forma de L de los que no. Una vez separados se puntuan los genes en base a cuantos puntos tienen en cada celda. Los puntos de las celdas superiores (1,2), (2,2) (2,3) puntuan siempre  negativamente, y los de las inferiores (1,1) (2,1) (3,1) (3,2) (3,3) lo hacen positivamente, si el gráfico tiene forma de L, y no puntuan si no la tiene.   
+     El resultado es que _cuanto "más L" es un scatterplot más positivo puntua, y cuanto "menos L" es, más negativamente_.   
+     Los genes que muestran puntos únicamente en la primera columna (1,1) (2,1) (3,1) o en la tercera fila ((3,1) (3,2) (3,3) no se consideran "Ls" pero puntuan cero.  
+    
+## Clasificación, puntuación y parámetros
+
+Cada método de hecho realiza dos cosas: 
+
+1. Clasifica los genes como "L" o no "L"
+2. Les asigna algún tipo de puntuación, que puede ser el coeficiente de correlación (Naïf) la información múua condicional mínima (CMI) o la suma de las puntuaciones de cada punto según su posición en la gradilla (Heurístico).  
+
+El resultado de la clasificación y, en el caso del método heurístico, el "score" del gen, depende de, para cada método, de un conjunto de parámetros. Si éstos cambian, cambiara el número de genes seleccionados y / o la puntuación del gen.
+
+Idealmente  podríamos utilizar un proceso de optimización por ejemplo para buscar los parámetros que proporcionen máxima sensibilidad y especificidad en la selección. Esto sin embargo se ve dificultado por el hecho de que cuesta disponer de genes que representen auténticos positivos o auténticos negativos, por lo que, de momento nos hemos basado en una selección manual de los parámetros
+
+## El pipeline de análisis
+
+- El análisis se ha llevado a cabo utilizando los pasos descritos en el documento  `AnalysisReport-2-L-Shape_Selection_Pipeline.pdf` que se enumeran brevemente a continuación
+
+1. Lectura de los datos y comprobación de su idoneidad para el análisis
+2. Aplicación de los tres métodos descritos a cada pareja de matrices Expresión-metilación.  
+    1.1. Fijación de parámetros  
+    1.2. Selección (y puntuación) de los genes  
+    1.3. Creación de tablas y gráficos con los resultados obtenidos.  
+3. Anotación (localización de la posición) de los genes seleccionados sobre el genoma.
+4. Creación de un gráfico que muestre cromosoma a cromosoma, para cada método y cada dataset la posición de los genes identificados como "L".
+
+# Los datos para el estudio
+
+En este estudio se han utilizado tres datasets:
+
+- Datos proporcionados por el investigador extraídos de 50 lineas celulares (de momento se han analizado 30).   Los datos, preprocesados adecuadamente, se encuentran disponibles en los archivos:
+    + `DAMicroarrays.csv` (expresión medidda con microarrays hgu133plus2 de affymetrix)
+    + `DAMetilacion.csv` (metilación medida con arrays de Illumina 25k)
+- Datos extraidos de dos estudios depositados en GEO. Los datos se han recogido de los registros GSE25062 para los datos de metilación y GSE25070 para los datos de expresión. El conjunto de datos se ha creado tomando los valores de expresión disponibles para 26 tumores de CRC y coincidiendo con sus correspondientes valores de metilación
+    +  `geoMicroarrays.csv` (expresion medida en arrays de ilumina tipo beadchips)
+    + `geoMetilación.csv` (metilación medida con arrays de Illumina 25k)
+- Datos obtenidos de TCGA usando la herramienta cBioportal para descargar datos del grupo de adenocarcinoma de colon, serie "Nature 2012". Los datos se han descargado de nivel 3 es decir preprocesados a nivel de gen. Y se han depurado posteriormente par detectar valores faltantes. Los pocos genes con más de un 75% de missings se han eliminado. Los que tenian unos pocos se han imputado. Los datos se encuentran en los archivos:
+    +  `TCGA-cBioPortal-Expressions.csv`
+    +  `TCGA-cBioPortal-Methylations.csv`
+
+```{r, echo=FALSE, results='hide'}
+options(digits=4)
+workingDir <- getwd()
+dadesDir <-  file.path(workingDir, "dades")
+codeDir <-  file.path(workingDir, "Rcode")
+resultsDir <- file.path(workingDir, "results")
+```
+
+```{r, echo=FALSE}
+# require(printr)
+DAExprData <- as.matrix(read.table(file=file.path(dadesDir,"DatosMicroarrays.csv"), header=TRUE, sep=";", dec=",", row.names = 1))
+DAMetilData <- as.matrix(read.table(file=file.path(dadesDir,"DatosMetilacion.csv"), header=TRUE, sep=";",dec=",", row.names = 1))
+cat("DA Microarray data : ", dim(DAExprData), "\n")
+cat("DA Methylation data: ", dim(DAMetilData), "\n")
+
+geoExprData <-  as.matrix(read.table(file=file.path(dadesDir,"GEOExpData.csv"), header=TRUE, sep=";", dec="."))
+geoMetilData <-  as.matrix(read.table(file=file.path(dadesDir,"GEOMethData.csv"), header=TRUE, sep=";", dec="."))
+cat("GEO Microarray data : ", dim(geoExprData), "\n")
+cat("GEO Methylation data: ", dim(geoMetilData), "\n")
+TCGAExprData <-  as.matrix(read.table(file="dades/TCGA-cBioPortal-Expressions.csv", header=TRUE, sep=",", dec=".", row.names=1))
+TCGAMetilData <-  as.matrix(read.csv(file="dades/TCGA-cBioPortal-Methylations.csv", header=TRUE, sep=",", dec=".", row.names=1))
+cat("TCGA Microarray data : ", dim(TCGAExprData), "\n")
+cat("TCGA Methylation data: ", dim(TCGAMetilData), "\n")
+```
+
+# Resultados
+
+## Selección de los datos
+
+El análisis se ha llevado a cabo con los tres pares de matrices de datos descritos en el apartado anterior.
+
+## Parámetros del análisis
+
+Para la selección de genes se ha usado los criterios siguientes
+
+- Método _Naive_: Se ha clasificado como "L" los genes con una correlación de Spearman negativa ($r\leq -0.5$) y un p-valor (FDR) ajustado por el método BH de $p\leq 0.25$.
+- Método _CMI_: Se han clasificado como L los genes que verifican que  
+    + EL cociente entre la Información mútua condicional (CMI) en cualquier valor entre 0 y 1 y el valor de la CMI en 0 es inferior a r<0.25.  
+    + El valor mínimo cMI(0) super un cierto umbral (aquí 0.1).  
+- Método _Heurístico_  
+    + Para decidir si un gen se clasifica como L se ha usado las siguientes tablas de valres mínimos/máximos: una para los datos de DA o de GEO y otra para los de TCGA.
+      * `Reqpercentages`: Porcentaje de genes que deben contener __como mínimo__ las celdas de "L":  (1,1), (2, 1), (3,1), (3,2), (3,3) y __como maximo__ las celdas no-L (1,2), (1,3), (2,2), (2,3)
+      * `theWeightMifL`: Pesos para puntuar cada punto de la celda si es una L.
+      * `theWeightMifNonL`:  Pesos para puntuar cada punto de la celda si NO es una L.
+      
+### Parámetros para la selección en muestras pequeñas: (GEO o DA)
+
+```{r}
+source("Rcode/gridFunctions.R")
+(reqPercentages   <- matrix (c(10, 20, 1, 5, 40, 20, 0, 5, 10), nrow=3, byrow=TRUE))
+(maxminCounts <- toReqMat(dim(DAMetilData)[2], reqPercentages)) 
+cat ("Informative. Not used in calculations, because it is computed within the loop")
+(theWeightMifL=matrix (c(2,-2,-25,1,0,-2,1,1,2), nrow=3, byrow=TRUE))
+(theWeightMifNonL=matrix (c(0,-2,-25,0,0,-2,0,0,0), nrow=3, byrow=TRUE))
+```
+
+### Parámetros para la selección en muestras grandes: (TCGA)
+```{r}
+(reqPercentages4TCGA <- matrix (c(4, 20, 5, 1, 40, 20, 0, 1, 4), nrow=3, byrow=TRUE))
+cat ("Informative. Not used in calculations, because it is computed within the loop")
+(sampleSize <- dim(TCGAMetilData)[2])
+(theWeightMifL=matrix (c(2,-2,-sampleSize/5,1,0,-2,1,1,2), nrow=3, byrow=TRUE))
+(theWeightMifNonL=matrix (c(0,-2,-sampleSize/5,0,0,-2,0,0,0), nrow=3, byrow=TRUE))
+
+
+```
+
+## Resultados
+
+### Tablas de resúmenes de resultados
+
+Los resultados de aplicar los tres métodos a cada dataset se han reunido en tres archivos (uno por dataset):
+
+```{r, echo=FALSE}
+DAvalues<- read.csv(file="results/LshapeScoresDA.csv", row.names = 1)
+GEOvalues<- read.csv(file="results/LshapeScoresGEO.csv", row.names = 1)
+TCGAvalues<- read.csv(file="results/LshapeScoresTCGA.csv", row.names = 1)
+```
+
+- `LshapeScoresDA.csv`
+- `LshapeScoresGEO.csv`
+- `LshapeScoresTCGA.csv`
+
+que contienen las columnas siguientes:
+
+- `r..Sp.`: Coefciende de correlación de Spearman
+- `p..Sp.`: P-valor para el test de significación de correlación
+- `adj.Spear.Pval`: -valor ajustado
+- `distCor`: Distancia de correlación. Otra forma de medir la correlación que toma sólo valores positivos
+- `SigNegCorr`: TRUE o FALSE segun si se cumplen los criterios definidos para el método Naive
+- `cMI_min`: Información mutua condicional mínima
+- `t_opt`: Punto en que CMI pasa de decrecer a crecer: (¿Puede considerarse el punto a partir del que el gen está metilado?)
+- `ratio`: Razon de CMI en el valor cero (si es menor que el valor fijado entonces el gen puede tener forma de L)
+- `meth_regulated`: TRUE o FALSE segun si se cumplen los criterios definidos para el método CMI
+- `logicSc`: TRUE o FALSE segun si se cumplen los criterios definidos para el método Heuristic
+- `numericSc`; Puntuación obtenida por el metodo heurístico.
+
+Los archivos de resultados se presentan en orden alfabético pero si por ejemplo los ordenamos por el coeficiente de correlación en orden ascendente tendríamos:
+
+```{r}
+head(DAvalues[order(DAvalues$r..Sp.,decreasing = FALSE),])
+head(GEOvalues[order(GEOvalues$r..Sp.,decreasing = FALSE),])
+head(TCGAvalues[order(TCGAvalues$r..Sp.,decreasing = FALSE),])
+
+```
+
+### El gen ZBTB18
+
+Este gen reviste especial interes para los investigadores por lo que podemos resaltar aquí los resultados obtenidos para él.
+
+Empezando por los gráficos resulta claro que no esperaremos que el algoritmo àra seleccionar formas de L lo seleccione pero que si lo haga la correlación negativa, como así resulta ser.
+
+```{r, echo=FALSE}
+#selectedGenes <- c("A1BG","A2ML1",  "A4GALT", "AAAS" )
+selectedGene <- c("ZBTB18", "ZBTB18")
+opt<- par(mfrow=c(2,2))
+plotGenesMat (mets=DAMetilData[selectedGene, ], 
+              expres=DAExprData[selectedGene,], x1=1/3, x2=2/3, 
+              percY1=1/3, percY2=2/3,
+              fileName=NULL, plotGrid = TRUE)
+abline( lm(DAExprData["ZBTB18",]~ DAMetilData["ZBTB18", ]))
+plotGenesMat (mets=DAMetilData[selectedGene, ], 
+              expres=DAExprData[selectedGene,], x1=1/3, x2=2/3, 
+              percY1=1/2, percY2=3/4,
+              fileName=NULL, plotGrid = TRUE)
+abline( lm(DAExprData["ZBTB18",]~ DAMetilData["ZBTB18", ]))
+par(opt)
+```
+
+Si miramos las puntuaciones obtenidas queda claro que tan sólo la correlación negativa retendría este gen.
+```{r}
+ZBTB18SummaryCorr<- DAvalues["ZBTB18",1:5]
+ZBTB18SummaryCMI<- DAvalues["ZBTB18",6:9]
+ZBTB18SummaryHeur<- DAvalues["ZBTB18",10:11]
+cat("Results for gene ZBTB18 based on selection by correlation")
+show(ZBTB18SummaryCorr)
+cat("Results for gene ZBTB18 based on selection by CMI")
+show(ZBTB18SummaryCMI)
+cat("Results for gene ZBTB18 based on selection by Heuristic Methd")
+show(ZBTB18SummaryHeur)
+
+```
+
+
+### Gráficos 
+
+El objetivo del análisis es encontrar genes regulados por metilación y esto se ha concretado en buscar aquellos que  tengan forma de L o se sitúen en una diagonal.  
+Una forma La forma de comprobarlo es visualizando el diagrama de dispersión.
+
+Los archivos:
+
+- `DAExprAllScores.pdf`
+- `GEOLGenesScores.pdf`
+- `TCGALGenesScores.pdf`
+
+contienen dichos gráficos.
+
+## Anotacion de los genes en los cromosomas
+
+Una vez seleccionada una lista de genes (es decir los que se clasifican "TRUE") para cada dataset y cada método se han representado los genes seleccionados sobre el cromosoma que los contiene, junto con las coordenadas de las islas CpG y de los sitios hipersensitivos de las DNAsas.
+
+Los archivos que contienen los gráficos se denominan `genePositionstcXXXyyy.pdf` donde XXX indica el método e `yyy`el dataset es decir se encuentran en los archivos
+
+- `genePositionstcNaiveDA.pdf`
+- `genePositionstcCMIDA.pdf`
+- `genePositionstcHeuristicDA.pdf`
+- `genePositionstcNaiveGEO.pdf`
+- `genePositionstcCMIGEO.pdf`
+- `genePositionstcHeuristicGEO.pdf`
+- `genePositionstcNaiveTCGA.pdf`
+- `genePositionstcCMITCGA.pdf`
+- `genePositionstcHeuristicTCGA.pdf`
+

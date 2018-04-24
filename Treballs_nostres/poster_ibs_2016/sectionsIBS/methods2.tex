@@ -1,0 +1,18 @@
+\subsection{Selection Based on Spline regression}
+\begin{itemize}
+\item Spline regression \cite{racine} was also considered as a basis for scatterplot clustering applying the following algorithm:
+%\item In spline regression a curve $y=s(x)$ is represented as $\mathbf{y}_i=\mathbf{B}_i\mathbf{c}$ where 
+%\begin{itemize}
+%\item $\mathbf{B}_i =\left[ B_{1p}\mathbf{x}_i,B_{2p}\mathbf{x}_i,\dots,B_{Lp}\mathbf{x}_i \right]$ the spline basis matrix and 
+%\item $\mathbf{c}$ is the vector of spline coefficients.
+%\end{itemize}
+
+%\item This suggests the following method (and algorithm) for detecting L--shaped genes based on \textbf{Clustering Spline Coefficients}:
+\begin {enumerate}
+\item Select genes with significant negative correlation.
+\item For each selected gene fit a cubic splines regression model.
+\item Obtain a distance matrix between all genes using the $1-\rho$ distance computed on spline coefficients.
+\item Perform a hierarchical clustering and 
+\item Select genes in the \textit{L-shaped cluster(s)}.
+\end{enumerate}
+\end{itemize}

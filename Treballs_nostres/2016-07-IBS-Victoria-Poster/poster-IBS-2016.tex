@@ -1,0 +1,63 @@
+\documentclass[a0,portrait]{a0poster}
+%\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+
+\input{sectionsIBS/style}
+
+\usepackage{theorem}
+{\theorembodyfont{\rmfamily}%
+%\newtheorem{ejemplo}{Ejemplo}[section]}
+%\usepackage{Sweave}
+
+\begin{document}
+
+%\vspace{1cm}
+\input{sectionsIBS/header}
+%\vspace{0.5cm}
+
+
+% ----------------------------------------------------------------
+
+
+\begin{multicols}{2}
+
+\fcolorbox{black}{white}{\parbox{1.0\columnwidth}
+{\input{sectionsIBS/intro}}}
+
+\begin{center}
+\includegraphics[width=0.9\columnwidth]{./images/Lshapes_1and2.png}
+\end{center}
+
+\fcolorbox{black}{backblue}{\parbox{1.0\columnwidth}
+{\input{sectionsIBS/objectives}}}
+
+\vspace{0.1cm} 
+\fcolorbox{black}{backgrey}{\parbox{1.0\columnwidth}
+{\input{sectionsIBS/methods1}}}
+
+%\vspace{0.6cm} 
+\fcolorbox{black}{backgrey}{\parbox{1.0\columnwidth}
+{\input{sectionsIBS/methods2}}}
+
+\fcolorbox{black}{backgrey}{\parbox{1.0\columnwidth}
+	{\input{sectionsIBS/methods3}}}
+
+% \vspace{0.6cm}
+\fcolorbox{black}{backyellow}{\parbox{1.0\columnwidth}
+{\input{sectionsIBS/results}}}
+
+%\vspace{1cm} \fcolorbox{black}{white}{\parbox{1.0\columnwidth}
+%{\input{sectionsIBS/conc}}}
+
+%\vspace{0.2cm} 
+\small\input{sectionsIBS/biblio}\normalsize
+
+\end{multicols}
+
+
+% ----------------------------------------------------------------
+
+%\vspace{0.5cm}
+\input{sectionsIBS/footer}
+
+\end{document}

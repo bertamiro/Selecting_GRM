@@ -1,0 +1,10 @@
+\frametitle{Objectives}
+The main objectives of this work are:
+\begin{enumerate}
+
+\item To introduce a new method to select genes showing an L-shape
+\item To compare it with previously available methods,
+\item To apply the selected methods on a specific CRC dataset and validate the findings based on their biological relevance.
+
+\end{enumerate}
+

@@ -1,0 +1,14 @@
+\frametitle{Methylation and gene expression}
+	\begin{itemize}
+		\item Although the relation between methylation and gene expression is probably continuous ("\emph{the more...the less...}"),
+		\begin{center}
+			\includegraphics[width=0.7\textwidth]{./images/DNA-Methylation-and-Gene-Expression-Relationship.jpg}
+		\end{center}
+		\item methylation is, in practice, seen as a dual phenomenon
+		\begin{itemize}
+			\item A methylated gene is ``off''
+			\item An unmethylated gene is ``on''
+		\end{itemize}
+		\item Practical problem: \textbf{\emph{at which methylation level a gene is seen as ``methylated'' (is it ``turned off'')?}}
+	\end{itemize}
+	

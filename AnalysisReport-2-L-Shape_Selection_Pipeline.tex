@@ -203,7 +203,7 @@ A summary of each datasets follows below:
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
 \hlkwd{require}\hlstd{(printr)}
-\hlkwd{load}\hlstd{(}\hlstr{"../DataSets/combined/matchedMarrRNAseqMethDataByPAIRS.Rda"}\hlstd{)}
+\hlkwd{load}\hlstd{(}\hlkwd{file.path}\hlstd{(dadesDir,}\hlstr{"matchedMarrRNAseqMethDataByPAIRS.Rda"}\hlstd{))}
 \hlstd{DAExprData} \hlkwb{<-} \hlkwd{as.matrix}\hlstd{(dataMarrCR2)}
 \hlstd{DAMetilData} \hlkwb{<-} \hlkwd{as.matrix}\hlstd{(dataMethCR2)}
 \hlkwd{rm}\hlstd{(dataMarrCR0,dataMarrCR2, dataMethCR1, dataMethCR2, dataMethVarCR1, dataMethVarCR2, dataRNAseqCR0, dataRNAseqCR0CS, dataRNAseqCR1, dataRNAseqCR1CS)} \hlcom{# clean files loaded with the desired files}
@@ -891,19 +891,26 @@ The resulting plots are available in files
 \end{alltt}
 \end{kframe}
 \includegraphics[width=\maxwidth]{figure/selectLGenes1-2} 
-\begin{kframe}\begin{alltt}
-\hlstd{myVenn4}\hlkwb{<-} \hlkwd{venn.diagram}\hlstd{(}\hlkwc{x}\hlstd{=}\hlkwd{list}\hlstd{(}\hlkwc{DAMicroarrays}\hlstd{=geneListLDAExpr,}
+
+\end{knitrout}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{myVenn4H}\hlkwb{<-} \hlkwd{venn.diagram}\hlstd{(}\hlkwc{x}\hlstd{=}\hlkwd{list}\hlstd{(}\hlkwc{DAMicroarrays}\hlstd{=geneListLDAExpr,}
                               \hlkwc{GEO}\hlstd{=geneListLGEOExpr,}
                               \hlkwc{TCGA}\hlstd{=geneListLTCGAExpr),}
                               \hlkwc{filename}\hlstd{=}\hlkwa{NULL}\hlstd{,} \hlkwc{lty} \hlstd{=} \hlstr{"blank"}\hlstd{,}
-                              \hlkwc{fill}\hlstd{=}\hlkwd{c}\hlstd{(}\hlstr{"pink1"}\hlstd{,} \hlstr{"skyblue"}\hlstd{,} \hlstr{"mediumorchid"}\hlstd{))}
+                              \hlkwc{fill}\hlstd{=}\hlkwd{c}\hlstd{(}\hlstr{"pink1"}\hlstd{,} \hlstr{"skyblue"}\hlstd{,} \hlstr{"mediumorchid"}\hlstd{),}
+                           \hlkwc{main}\hlstd{=}\hlstr{"Genes in common between the three -heuristic selected- gene lists"}\hlstd{)}
 \hlkwd{grid.newpage}\hlstd{()}
-\hlkwd{grid.draw}\hlstd{(myVenn4)}
+\hlkwd{grid.draw}\hlstd{(myVenn4H)}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/selectLGenes1-3} 
+\includegraphics[width=\maxwidth]{figure/commonHeuristic3-1} 
 
 \end{knitrout}
+
 
 \section{Comparison between the selected lists}
 
@@ -1244,6 +1251,10 @@ For example the table of annotations corresponding to the \texttt{selectedNaiveD
 
 \subsection{Visualization of selected genes in the chromosomes}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% HO HE DEIXAT A FALSE PQ HI INTERVENEN ARXIUS GRANS QUE NO TINC A GITHUB
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 An interesting question when selecting genes putatively regulated by Methylation is if the genes are located at random or if they are clustered or grouped according to some criterion.
 
 Two distinct classes of objects can be reasonably related with methylated genes: \texttt{CpG Islands} and \emph{DNAse I Hypersensitive Sites (DHS)}. 
@@ -1260,34 +1271,7 @@ The resulting plots will be printed to pdf files  \texttt{Genes2Chromosomes-\emp
 
 As a first step to plotting the coordinates of the \emph{necessary} CpG islands and DH sites are obtained. By ``necessary'' we mean only those that correspond to positions located between the first transcript and the last transcripts associated with selected genes. Information is read from public files and stored in objects of type \texttt{GRanges}, a Bioconductor class to efficiently store information about sequences.
 
-\begin{knitrout}
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
-\begin{verbatim}
-## GRanges object with 6 ranges and 0 metadata columns:
-##       seqnames           ranges strand
-##          <Rle>        <IRanges>  <Rle>
-##   [1]    chr10 [ 93098,  93818]      *
-##   [2]    chr10 [ 94002,  94165]      *
-##   [3]    chr10 [ 94527,  95302]      *
-##   [4]    chr10 [119652, 120193]      *
-##   [5]    chr10 [122133, 122621]      *
-##   [6]    chr10 [180265, 180720]      *
-##   -------
-##   seqinfo: 81 sequences from an unspecified genome; no seqlengths
-## GRanges object with 6 ranges and 1 metadata column:
-##       seqnames           ranges strand |      data
-##          <Rle>        <IRanges>  <Rle> | <integer>
-##   [1]     chr1 [ 10100,  10330]      * |       261
-##   [2]     chr1 [ 10345,  10590]      * |       310
-##   [3]     chr1 [ 16100,  16315]      * |       158
-##   [4]     chr1 [ 65905,  66055]      * |       157
-##   [5]     chr1 [ 91405,  91615]      * |       278
-##   [6]     chr1 [115600, 115790]      * |       545
-##   -------
-##   seqinfo: 24 sequences from an unspecified genome; no seqlengths
-\end{verbatim}
-\end{kframe}
-\end{knitrout}
+
 
 Next for each set of transcripts coordinates 
 
@@ -1338,15 +1322,11 @@ Figure \ref{chromosome1} shows the genes selected using the Naive method on the 
              \hlkwc{sizes}\hlstd{=}\hlkwd{c}\hlstd{(}\hlnum{1}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{20}\hlstd{),} \hlkwc{main}\hlstd{=}\hlstr{"chr1"}\hlstd{,} \hlkwc{cex.main}\hlstd{=}\hlnum{1}\hlstd{,}  \hlkwc{littleTicks} \hlstd{=} \hlnum{TRUE}\hlstd{,} \hlkwc{showTitle}\hlstd{=}\hlnum{TRUE}\hlstd{)}
 \hlkwd{dev.off}\hlstd{()}
 \end{alltt}
-\begin{verbatim}
-## pdf 
-##   2
-\end{verbatim}
 \end{kframe}
 \end{knitrout}
 
 \begin{figure}
-\includegraphics{results/chromosome1NaiveDA.pdf}
+%\includegraphics{results/chromosome1NaiveDA.pdf}
 \caption{\label{chromosome1} Distribution of genes on Chromosome 1. The genes are plotted as vertical purple lines, blue lines are the DNAse I hypersensitive sites and grey lines represent an accumulation of CpG islands.}
 \end{figure}
 
@@ -1370,17 +1350,6 @@ For example, for the first chromosome and the gene list obtained by the Naive me
                       \hlkwc{strand}\hlstd{=}\hlkwd{Rle}\hlstd{(}\hlkwd{strand}\hlstd{(}\hlkwd{rep}\hlstd{(}\hlstr{"*"}\hlstd{,}\hlkwd{nrow}\hlstd{(islandHMM2)))))}
 \hlcom{## Overlapping two GRanges objects:}
 \hlkwd{table}\hlstd{(}\hlopt{!}\hlkwd{is.na}\hlstd{(}\hlkwd{findOverlaps}\hlstd{(islandDataSel, genRangList,} \hlkwc{select}\hlstd{=}\hlstr{"arbitrary"}\hlstd{)))}
-\end{alltt}
-\end{kframe}
-
-
-\begin{tabular}{r|r}
-\hline
-FALSE & TRUE\\
-\hline
-50594 & 557\\
-\hline
-\end{tabular}\begin{kframe}\begin{alltt}
 \hlstd{countFeatOverlaps} \hlkwb{<-} \hlkwd{countOverlaps}\hlstd{(islandDataSel, genRangList)}
 \hlstd{findFeatOverlaps} \hlkwb{<-} \hlkwd{findOverlaps}\hlstd{(islandDataSel, genRangList)}
 \hlstd{subsetFeatOverlaps} \hlkwb{<-} \hlkwd{subsetByOverlaps}\hlstd{(islandDataSel, genRangList)}
@@ -1389,8 +1358,8 @@ FALSE & TRUE\\
 \end{kframe}
 \end{knitrout}
 
-The overlaps between the model CpG islands identified on the human genome and the genes identified from our query dataset (Naive-DA) were selected by 2 different methods with the following results:
-For a non-defined overlap, there were 560 overlaps between the model CpG islands and the genes selected from the DA data; and for a within feature overlap, there were 1 overlaps.   
+%The overlaps between the model CpG islands identified on the human genome and the genes identified from our query dataset (Naive-DA) were selected by 2 different methods with the following results:
+%For a non-defined overlap, there were length(findFeatOverlaps) overlaps between the model CpG islands and the genes selected from the DA data; and for a within feature overlap, there were length(findFeatOverlapsWITHIN) overlaps.   
 
 \clearpage
 \begin{thebibliography}{9}

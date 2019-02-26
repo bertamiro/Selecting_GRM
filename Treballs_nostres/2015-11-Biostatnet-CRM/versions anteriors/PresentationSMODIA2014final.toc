@@ -1,0 +1,11 @@
+\beamer@endinputifotherversion {3.33pt}
+\beamer@sectionintoc {1}{Motivation}{3}{0}{1}
+\beamer@subsectionintoc {1}{1}{Genome-wide analysis of colorectal cancer}{3}{0}{1}
+\beamer@subsectionintoc {1}{2}{Objectives}{9}{0}{1}
+\beamer@sectionintoc {2}{Methods for selecting L--shaped patterns}{10}{0}{2}
+\beamer@subsectionintoc {2}{1}{Selection based on conditional mutual information}{11}{0}{2}
+\beamer@subsectionintoc {2}{2}{Selection based on Spline regression}{17}{0}{2}
+\beamer@sectionintoc {3}{Results}{19}{0}{3}
+\beamer@subsectionintoc {3}{1}{Results from using cMI to select genes}{19}{0}{3}
+\beamer@subsectionintoc {3}{2}{Results from using Splines regression to select genes}{20}{0}{3}
+\beamer@sectionintoc {4}{Discussion and Conclusions}{22}{0}{4}

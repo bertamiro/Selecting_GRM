@@ -1,0 +1,123 @@
+          Información previa a la reevaluación de PRO2
+          ============================================
+
+Todas las cuestiones de horarios, aulas, etc, las resolverá la FIB a tiempo para realizar la inscripción.
+
+Será obligatoria la asistencia a todas las sesiones. La no asistencia injustificada a cualquiera de ellas supondrá el suspenso de la reevaluación. Se entiende como asistencia la presencia activa en toda la sesión. Cada profesor se reserva la posibilidad de pasar lista en cualquier momento.
+
+Cada sesión llevará asociados dos tipos de ejercicios:
+
+    - previos: los que aparecen al final de este documento, clasificados por sesiones, para entregar antes de cada sesión
+
+    - deberes: los que se encargarán tras cada sesión para entregar antes de la siguiente (en la sesión 1 de teoría se encargarán ejercicios para entregar antes de la 2, etc; idem para el laboratorio)
+
+Ambos tipos de ejercicios son de entrega obligatoria. Algunos se deberán entregar solo via Racó->Pràctiques, otros solo vía Jutge y un tercer grupo se deberá entregar en ambas plataformas. El plazo de entrega termina una hora antes del comienzo de la sesión correspondiente.
+
+Si no se entregan todos los ejercicios o se entregan soluciones significativamente malas, implicará suspender la reevaluación.  Recordad que ésta ha de representar 50 horas de trabajo, entre clases, realización de ejercicios y examen. Muchos de los ejercicios que pedimos proceden de las actividades realizadas durante el cuatrimestre, de forma que ya tendríais que haber resuelto la mayoría de ellos. Em el caso de los ejercicios del Jutge, las soluciones *se han de volver a entregar* durante el curso de reevaluación, ya que para algunos de ellos se han añadido juegos de pruebas.
+
+Recomendamos descargar/copiar toda la información en el momento de la inscripción y empezar a trabajar desde ese mismo momento.
+
+Formato de entrega:
+
+* Ejercicios para las sesiones de teoría: se ha de entregar un pdf con el código de la solución (en todos los casos) y su justificación (solo en los ejercicios que *no* requieran usar punteros). También hay que llevar a clase una versión de las soluciones correspondientes, ya sea en un dispositivo electrónico (portátil, tablet, ...) o en papel. No es obligatorio, aunque sí recomendable, que estas soluciones compilen perfectamente.
+
+* Ejercicios sin Jutge para las sesiones de laboratorio: se ha de entregar un código que funcione si se compila con las opciones -D_GLIBCXX_DEBUG y std=c++11.  También se ha de tener una copia compilable y ejecutable de las soluciones en la máquina donde se realice la sesión correspondiente y un juego de pruebas no trivial.
+
+* Ejercicios con Jutge para las sesiones de laboratorio: se han de obtener todos los semáforos verdes posibles y se ha de tener una copia compilable y ejecutable de las soluciones en la máquina donde se realice la sesión correspondiente (añadiendo los respectivos mains, en caso de que la solución no los incluya originalmente).
+
+Se dará información más detallada (ficheros concretos que se han de entregar, ejemplos, etc) en el enlace de cada entrega en el Racó.
+
+
+Tabla de ejercicios previos de cada sesión:
+
+En la página de entrega de prácticas del Racó aparecerá esta lista desglosada sesión por sesión. Todas las referencias al jutge de PRO2 son respecto al curso "PRO2 PRIMAVERA 2018". Todas las referencias a ejercicios de examen que no tienen jutge son respecto al material publicado en la web de PRO2, pestaña "Material Docent", apartado "Exàmens parcials", pinchar en "Anteriors".
+
+Comunes a las sesiones "Teoría 1" y "Laboratorio 1":
+
+Han de estar entregados en formato laboratorio una hora antes de la sesión 1 de laboratorio (lunes 9 de julio). Todos son del jutge.
+
+   - X73814 Simplificació d'un vector d'estudiants agrupats
+
+   - X99804 Mitjanes selectives 2
+
+   - todos los de las sesiones 5, 6 y 7 (Uso de pilas, colas, listas, árboles binarios, sets y maps).
+                  
+                   
+Teoría 1 (6/jul):
+
+Se ha de entregar en formato teoría la siguiente selección.  Es fundamental proponer una justificación correcta.
+
+   1) X93239 - Comptatge d'elements frontissa d'un vector
+
+   2) X87747 (modificado respecto a la versión del jutge) - Comptatge d'elements solitaris d'una llista (las modificaciones se podrán ver en el enlace de la entrega del Racó)
+
+   3) (No tiene jutge todavía) examen parcial primavera 2013 ejercicio 2 Arbres quasi coincidents (cambiando Arbre por BinTree, las modificaciones se podrán ver en el enlace de la entrega del Racó)
+
+   4) X78332 Camino preferente de un árbol
+
+
+Laboratorio 1 (9/jul):
+
+Se han de entregar todos los ejercicios comunes de las sesiones 1 (Teoría/Laboratorio). Prestaremos especial atención a los ejercicios seleccionados para la sesión de teoría. De ellos, los que estén en el Jutge se han de reentregar *en las dos plataformas* con la versión más eficiente que hayáis podido justificar. Si es posible, intentaremos producir varias soluciones diferentes.
+                 
+                   
+
+Comunes a las sesiones "Teoría 2" y "Laboratorio 2":
+
+Han de estar entregados en formato laboratorio una hora antes de la sesión 2 de laboratorio (miércoles 11 de julio).
+
+Todos los de la lista "1r parcial de teoria" del jutge Además, una selección de ejercicios de examen, con enunciados modificados, que no tienen jutge.
+
+
+Teoría 2 (10/jul):
+
+Se ha de entregar en formato teoría la siguiente selección.  Las especificaciones modificadas se podrán ver en el enlace de la entrega del Racó
+    
+   1) examen final primavera 2014 ejercicio 1, sin acceder a la implementación con punteros y sin push_back o similares
+
+   2) examen final otoño 2014, ejercicio 2, cambiando árboles   generales por la clase BinTree de PRO2, sin acceder a la implementación con punteros
+
+   3) examen final primavera 2015 ejercicio 1, sin acceder a la implementación con punteros
+
+   4) examen final primavera 2015 ejercicio 2, cambiando árboles N-arios por la clase BinTree de PRO2, sin acceder a la implementación con punteros
+
+
+Laboratorio 2 (11/jul):
+
+Se han de entregar todos los ejercicios comunes de las sesiones 2 (Teoría/Laboratorio).
+
+Prestaremos especial atención a los ejercicios seleccionados para la sesión de teoría, que no tienen Jutge. Las especificaciones modificadas se podrán ver en el enlace de la entrega del Racó.
+ 
+
+
+Comunes a las sesiones "Teoría 3" y "Laboratorio 3":
+
+Han de estar entregados en formato laboratorio una hora antes de la sesión 3 de laboratorio (viernes 13 de julio).
+
+Jutge: todos los de las sesiones 13 y 14 de laboratorio(Apuntadors 1 y Apuntadors 2) y todos los del segundo parcial. Además, una selección de ejercicios de examen, con enunciados modificados, que no tienen jutge
+
+
+Teoría 3 (12/jul):
+
+Se ha de entregar en formato teoría la siguiente selección. Las especificaciones modificadas se podrán ver en el enlace de la entrega del Racó
+
+   1) examen *parcial* primavera 2014 ejercicio 1, adaptado a    la clase Llista implementada con punteros
+
+   2) examen *parcial* primavera 2014 ejercicio 2, adaptado a    árboles Narios implementados con punteros + versión extendida
+
+   3) examen final primavera 2014, ejercicio 1 con las    restricciones de implementación que se podrán ver en el enlace de la entrega del Racó
+
+   4) examen final otoño 2014, ejercicio 2 + versión extendida
+
+                       
+Laboratorio 3 (13/jul):
+
+Se han de entregar todos los ejercicios comunes de las sesiones 3 (Teoría/Laboratorio).
+
+Prestaremos especial atención a los ejercicios seleccionados para la sesión de teoría, que no tienen Jutge. Las especificaciones modificadas se podrán ver en el enlace de la entrega del Racó
+
+                       
+En clase podréis comentar lo que queráis sobre los ejercicios, pero la idea es dedicar solo una pequeña parte del tiempo de cada sesión a los ejercicios de sesiones anteriores.
+
+Por último, los alumnos que hayan cumplido todos los requisitos de asistencia y entregas podrán presentarse al examen de la reevaluación.
+

@@ -1,0 +1,552 @@
+%
+% Informe interno sobre los datos de Diego Arango
+%
+\documentclass[a4paper,10pt]{article}
+% \documentclass[a4paper,10pt,dvips]{article} 
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+%\usepackage{graphicx}
+%\usepackage{pstricks}
+
+\setlength{\oddsidemargin}{0pt} \setlength{\evensidemargin}{0pt}
+\setlength{\marginparwidth}{1in} \setlength{\marginparsep}{0pt}
+
+\setlength{\topmargin}{0pt} \setlength{\headheight}{0pt}
+\setlength{\headsep}{0pt} \setlength{\topskip}{0pt}
+
+%\footheight 0pt
+%\footskip 0pt
+% A4 is 29,7301778cm x 21,0224103cm
+%     =  9,7047944in x 6,2765395in
+\setlength{\textheight}{24,6501778cm}
+\setlength{\textwidth}{15,9424103cm}
+
+\setlength{\parindent}{0pt}
+
+\pagestyle{plain}
+
+\title{Scatterplot clustering for the integrative analysis of expression and methylation data}
+\author{M. Carme Ruiz de Villa, Francesc Carmona \\ Diego Arango del Corro, Alex Sánchez}
+\date{2014-09-19}
+
+%
+\usepackage{Sweave}
+\SweaveOpts{prefix.string=figuras/}
+\setkeys{Gin}{width=0.6\textwidth}
+
+\begin{document}
+\SweaveOpts{concordance=TRUE}
+
+\maketitle
+\thispagestyle{empty}
+
+\begin{abstract}
+En este trabajo se utilizan las técnicas de 
+\end{abstract}
+
+\vfill
+
+\begin{center}
+\includegraphics{figuras/signatura_cmyk.pdf}
+\end{center}
+
+\newpage
+
+\section{Métodos estadísticos}
+
+\subsection{Gene-specific methylation on-off threshold}
+
+Methylation is often described as a binary on-off signal,
+and it is widely recognized that methylation represses gene
+expression. Typically, if a gene is controlled by its methylation,
+its expression is low when methylated. 
+On the other hand,
+when unmethylated, its expression can be either high or low.
+Since measurements for methylation and expression are both
+continuous, a biaxial plot of these two signals will exhibit an
+L-shape pattern. 
+
+\medskip
+If we truly believe that methylation is binary, there are two implications:
+\begin{enumerate}
+\item the reflection point of the L-shape is an appropriate choice
+to binarize methylation data, and
+\item conditioning on the
+binarized on-off methylation status, the continuous valued
+methylation data and expression data should be independent,
+\end{enumerate}
+which motivates Liu(2012) to quantify the L-shape pattern using
+conditional mutual information (MI). 
+
+%In this section, we
+%use TCGA data to ask 
+
+\subsection{Conditional Mutual Information}
+Two questions: which genes exhibit
+L-shape, and what is the optimal threshold for binarizing
+methylation data for each L-shape gene.
+
+\medskip
+To determine whether methylation and expression of a gene exhibit an L-shape,
+we compute the conditional Mutual Information (MI) for different choices of threshold
+to binarize the methylation data.
+
+
+\medskip
+If we consider the continuous valued methylation and expression data as two random variables
+$X$ and $Y$, and denote a nominal threshold as $t$, the conditional MI can be written as a
+weighted sum of MIs on the two sides of the threshold.
+\[
+\mathit{cMI}(t)=I(X,Y|X>t)P(X>t) + I(X,Y|X\le t)P(X\le t)
+\]
+
+\subsection{Optimal threshold}
+
+When $t$ is $0$ or $1$, $\mathit{cMI}$ equals to the mutual information derived 
+from all data points.
+
+For an L-shape gene, as $t$ moves from 0 to 1, $\mathit{cMI}(t)$ first decreases and then
+increases, and its value approaches zero when $t$ coincides with the reflection point. 
+Therefore,
+
+\medskip
+
+The ratio $r=\frac{\min\{\mathit{cMI}(t)\}}{\mathit{cMI}(0)}$ for an L-shape gene is small, 
+and $t^{\ast} = \mathrm{argmin}\{ \mathit{cMI}(t) \}$ is the optimal threshold for 
+dichotomizing the methylation data of this gene.
+
+\subsection{Joint distribution estimator}
+To estimate the MI terms we use a kernel-based estimator, which constructs a joint
+probability distribution by applying a Gaussian kernel to each data point, and estimates
+the MI based on the joint distribution. The estimator is as follows:
+\[
+I(X,Y) = \frac 1M \sum_{i=1}^M \log\frac{M\sum_{j=1}^M e^{-\frac{1}{2h^2}((x_i-x_j)^2+(y_i-y_j)^2)}}{%
+                                      \sum_{j=1}^M e^{-\frac{1}{2h^2}(x_i-x_j)^2} \sum_{j=1}^M e^{-\frac{1}{2h^2}(y_i-y_j)^2}}
+\]
+where $h$ is a tuning parameter for the kernel width and empirically set $h=0.3$.
+% i and j are indices for samples.
+% In our analysis, we normalize the expression data to zero mean.
+
+\subsection{L-shapes}
+
+We filtered for L-shapes using a combination of three criteria:
+\begin{itemize}
+\item the ratio $r<0.25$
+\item unconditioned MI $\mathit{cMI}(0)>0.1$
+\item the median expression on the left side of the optimal threshold $t^{\ast}$ is higher
+than the median expression on the right side.
+\end{itemize}
+
+The parameters are chosen according to a random permutation test (see Liu(2012)).
+
+\medskip
+According to the above criteria, a total of 641 genes are selected to be L-shape genes.
+
+\section{El análisis}
+
+\subsection{Los datos}
+
+A partir del archivo \verb|Data_CorrelationsTots.csv| se monta el \verb|data.frame| que contiene los datos.
+<<eval=FALSE, echo=FALSE>>=
+options(digits=4)
+workingDir <- getwd()
+dadesDir <-  file.path(workingDir, "Data")
+graficsDir<-file.path(workingDir, "figuras")
+Dades <- read.table(file=file.path(dadesDir,"Data_CorrelationsTots.csv"),
+                    header=TRUE, sep=";")
+# ngenes <- nrow(Dades)
+rownames(Dades) <- Dades[,1]
+Dades <- Dades[-c(248,2637), 2:61]
+ColNamesOriginal <- colnames(Dades)
+colnames(Dades)<-c("expr1","expr2","expr3","expr4","expr5","expr6","expr7",
+                   "expr8","expr9","expr10","expr11","expr12","expr13","expr14","expr15","expr16",
+                   "expr17","expr18","expr19","expr20","expr21","expr22","expr23","expr24","expr25",
+                   "expr26","expr27","expr28","expr29","expr30","met1","met2","met3","met4","met5",
+                   "met6","met7","met8","met9","met10","met11","met12","met13","met14","met15",
+                   "met16","met17","met18","met19","met20","met21","met22","met23","met24","met25",
+                   "met26","met27","met28","met29","met30")
+DadesExprScaled <- t(apply(Dades[ ,1:30],1,scale))
+Dades.originals <- Dades
+Dades <- cbind(Dades[ ,31:60],DadesExprScaled)
+colnames(Dades)[31:60] <- colnames(Dades.originals)[1:30] 
+@
+
+Una vez limpio y escalados los datos de expresión, se ha grabado el conjunto de datos en el archivo \verb|DataNet.RData| y así podemos cargar los datos directamente.
+<<datos,  echo=FALSE>>=
+# ja podem carregar les dades directament
+options(digits=4)
+workingDir <- getwd()
+dadesDir <-  file.path(workingDir, "Data")
+graficsDir <- file.path(workingDir,"figuras")
+load(file=file.path(dadesDir,"DataNet.RData"))
+@
+
+Las 30 primeras columnas son los datos de Metilación y las últimas 30 son datos de Expresión.
+
+\medskip
+En primer lugar procedemos a eliminar de la base de datos aquellos genes que contienen algún valor \textit{missing}. En concreto son \Sexpr{sum(apply(is.na(Dades),1,sum) > 0)}.
+<<del-missing, eval=FALSE, echo=FALSE>>=
+Dades <- Dades[apply(is.na(Dades),1,sum) == 0, ]
+@
+Si los eliminamos quedan \Sexpr{sum(apply(is.na(Dades),1,sum) == 0)} genes remanentes en la base de datos.
+
+\subsection{Cálculo de la \textit{conditional Mutual Information}}
+
+En primer lugar se han creado un par de funciones que calculan la \textit{conditional Mutual Information} entre las muestras de metilación y expresión para cada gen.
+<<cmi, echo=FALSE>>=
+MI <- function(x,y,h){
+# x : vector of methylations
+# y : vector of expressions  
+# h : the std of the Gaussian kernel for density estimation 
+
+if(length(x) != length(y))  stop("Different number of samples!")
+
+M <- length(x) # samples
+aux <- 0
+two.h.square <- 2*h^2
+
+for(i in 1:M){
+  # kernel distance between the i.th data point and all other points j for each gene k
+ tmpx <- x - x[i] 
+ tmpx <- exp(-tmpx^2/(two.h.square))
+ tmpy <- y - y[i]
+ tmpy <- exp(-tmpy^2/(two.h.square))
+ tmp <- tmpx*tmpy
+ aux <- aux + log(M*sum(tmp)/(sum(tmpx)*sum(tmpy)))
+ }
+aux/M
+}
+
+cMI <- function(dataMeth,dataExp,t,h=0.3){
+# dataMeth : input data methylation
+# dataExp  : input data expression
+# t : moves from 0 to 1
+  n <- length(dataMeth)
+  if(length(dataExp) != n)  stop("Different number of samples!")
+  if(t < 0 | t > 1)  stop("t value is out of range")
+  
+  filter <- dataMeth < t
+  ss <- sum(filter)
+  if(ss != 0){
+  x <- dataMeth[filter]
+  y <- dataExp[filter]
+  aux <- MI(x,y,h)*ss/n
+  }
+  else{
+    aux <- 0
+  }
+  ss <- sum(!filter)
+  if(ss != 0){
+  x <- dataMeth[!filter]
+  y <- dataExp[!filter]
+  aux + MI(x,y,h)*ss/n
+  }
+  else{
+    aux
+  }
+}
+@
+Con ellas se procede a la selección de los casos (genes) que verifican los dos primeros criterios.
+<<selection1, eval=FALSE, echo=FALSE>>=
+tt <- seq(0,1,by=0.01)
+nt <- length(tt)
+ngenes <- dim(Dades)[1]
+nsamples <- 30
+cmi <- matrix(rep(0,nt*ngenes), ncol=nt)
+
+calcul.t <- function(Data.vector, t.value){
+  x <- as.vector(t(Data.vector[1:nsamples]))
+  y <- as.vector(t(Data.vector[(nsamples+1):(2*nsamples)]))
+  cMI(x,y,t=t.value)
+  }
+
+for(i in 1:nt){
+  aux <- function(Data.vector) calcul.t(Data.vector, t.value=tt[i])
+  cmi[ ,i] <- apply(Dades,1,aux)
+}
+
+cmi.min <- apply(cmi,1,min)
+ratio <- cmi.min/cmi[,1]
+
+filter <- cmi[,1] > 0.1 & ratio < 0.25
+Dades.sel <- Dades[filter,]
+cmi.sel <- cmi[filter, ]
+cmi.min.sel <- cmi.min[filter]
+
+n.sel <- dim(Dades.sel)[1]
+@
+<<carreguem, echo=FALSE>>=
+load("results.RData")
+@
+Los genes que verifican $r<0.25$ son \Sexpr{sum(ratio < 0.25)} y los que además verifican que $cMI(0)>0.1$ son \Sexpr{dim(Dades.sel)[1]}.
+
+\medskip
+A continuación procedemos a seleccionar los genes que han quedado con el tercer criterio.
+<<selection2, echo=FALSE>>=
+criteri3 <- logical(n.sel)
+for(i in 1:n.sel){
+  t.ast <- mean(tt[which(cmi.sel[i,] == cmi.min.sel[i])])
+  dataMeth <- Dades.sel[i,1:nsamples]
+  dataExp <- Dades.sel[i,(nsamples+1):(2*nsamples)]
+  filter <- dataMeth < t.ast
+  x <- dataExp[filter]
+  y <- dataExp[!filter]
+  criteri3[i] <- mean(x) > mean(y)
+}
+n.sel <- sum(criteri3)
+
+Dades.sel <- Dades.sel[criteri3,]
+cmi.sel <- cmi.sel[criteri3, ]
+cmi.min.sel <- cmi.min.sel[criteri3]
+
+genes.sel <- rownames(Dades.sel)
+# write.table(genes.sel,file="genesSel.csv")
+@
+
+
+Dichos genes seleccionados por los tres criterios estan en el archivo \verb|genesSel.RData| y son \Sexpr{n.sel}.
+
+\medskip
+En el siguiente gráfico vemos un ejemplo de gen seleccionado:
+\begin{center}
+<<grafic1, echo=FALSE, fig=TRUE>>=
+par(mfcol=c(2,1))
+# for(i in 1:n.sel){
+i<-2
+Data.vector <- Dades.sel[i, ]
+x <- as.vector(t(Data.vector[1:nsamples]))
+y <- as.vector(t(Data.vector[(nsamples+1):(2*nsamples)]))
+plot(x,y,xlim=c(0,1), xlab="methylation", ylab="expression", main=rownames(Dades.sel)[i])
+t.ast <- mean(tt[which(cmi.sel[i,] == cmi.min.sel[i])])
+abline(v=t.ast)
+plot(tt,cmi.sel[i,], type="l", xlab="methylation", ylab="conditional MI")
+abline(v=t.ast)
+# }
+par(mfcol=c(1,1))
+@
+\end{center}
+
+\section{Clustering approach}
+
+Para que el análisis cluster no se pierda con muchos genes que no tienen la forma L deseada, en primer lugar procedemos a eliminar aquellos genes que 
+<<selection-mamen, echo=FALSE>>=
+Q0.75<-function(x)
+{
+  x<-as.numeric(x)
+  Q<-quantile(x,0.75, na.rm=TRUE)
+  return(Q)
+}
+
+Q0.75Dades<-apply(Dades[,1:30],1,Q0.75) ###de les metilacions
+
+Q0.25<-function(x)
+{
+  x<-as.numeric(x)
+  Q<-quantile(x,0.25, na.rm=TRUE)
+  return(Q)
+}
+
+Q0.25Dades<-apply(Dades[,1:30],1,Q0.25)  ###de les metilacions
+
+Dades.cluster <- Dades[Q0.75Dades >0.6 & Q0.25Dades < 0.25,  ]
+@
+De forma que nos quedamos con \Sexpr{sum(Q0.75Dades >0.6 & Q0.25Dades < 0.25)}.
+
+El siguiente paso consiste en calcular las correlaciones de Spearman para cada gen y seleccionar aquellos que tengan una correlación negativa significativa.
+
+<<selection-cor, echo=FALSE>>=
+library(Hmisc)
+corTest <- function (x){
+  cors <- rcorr(x[1:30],x[31:60], type="spearman")
+  return(unlist(list(r=cors$r[1,2], p=cors$P[1,2])))
+}
+
+allCors<-t(apply(Dades.cluster,1,corTest))
+row.names(allCors)<-row.names(Dades.cluster)
+###menys restrictiu
+# Sel1<-allCors[,1]< 0 & allCors[,2]< 0.055 & Q0.75Dades >0.5 
+# Cors1<-allCors[Sel1,]
+################
+Sel <- allCors[ ,1] < 0 & allCors[,2] < 0.055   
+Cors <- allCors[Sel,]
+DadesCor <- Dades.cluster[Sel, ]
+# DadesNotCor<-Dades[!Sel,]
+@
+
+Hacemos una lista de matrices met/expr para cada gen. 
+<<lista-matrices, echo=FALSE>>=
+ngenesCor <- dim(DadesCor)[1]
+ListGenes <- list()
+for (i in 1:ngenesCor)
+{x<-as.numeric(DadesCor[i,1:30])
+ y<-as.numeric(DadesCor[i,31:60])
+ DadesGene<-na.omit(data.frame(met=x,expr=y))
+ ListGenes[[i]]<-DadesGene
+}
+namesGenesCor <- row.names(DadesCor)
+names(ListGenes)<-as.character(namesGenesCor)
+@
+
+\subsection{Análisis cluster}
+
+\subsubsection{Cálculo de los b-splines}
+
+Aplicamos la función \verb|splines| a los datos ajustando con \verb|degree=2| y obtenemos una lista con los coeficientes de los splines de cada gen. 
+<<b-splines, echo=FALSE>>=
+library(splines)
+calculaSplines<-function(mat)
+{
+ Qmet <- quantile(mat$met, probs=c(0.25,0.5,0.75))
+ reg<-lm(expr~bs(met,knots=Qmet, degree=2), data=mat)
+ summ<-summary(reg)
+ return(summ$coef)
+}
+# Obtenim les taules summary per cada gen
+# ListSplines <- list()
+ListSplines<-lapply(ListGenes, calculaSplines)
+names(ListSplines) <- namesGenesCor
+@
+
+\subsubsection{Cluster analysis}
+Posteriormente se ha realizado un análisis de cluster jerárquico utilizando los coeficientes  de los b-splines como variables para realizar la agrupación. El número de clusters óptimo es 4 con una distribución:
+<<cluster-ana, echo=FALSE>>=
+library(cluster)
+matDadesCluster <- matrix(0, nrow=ngenesCor, ncol=6)
+for(i in 1:ngenesCor) matDadesCluster[i,] <- ListSplines[[i]][,1]
+colnames(matDadesCluster) <- c("interc", "coef1", "coef2","coef3","coef4","coef5")
+row.names(matDadesCluster) <- namesGenesCor
+
+Hcluster<-hclust(as.dist(1-cor(t(matDadesCluster))), method="average")
+plot(Hcluster, main="cluster de coeficients")
+
+Hclustgroups0.5 <- cutree(Hcluster, h=0.5) #vector de longitut nombre de gens amb el numero de cluster
+table(Hclustgroups0.5)
+Hclustgroups<-Hclustgroups0.5 
+nclusters<-dim(table(Hclustgroups))
+names(Hclustgroups)<-row.names(matDadesCluster)
+@
+
+Seleccionamos los \Sexpr{nclusters} clusters obtenidos cortando el árbol a 0.5
+
+
+\begin{center}
+<<Plot con gráfico de los b-splines, echo=FALSE>>=
+plotWithSplines<-function(mat,titleText)
+{
+  x<-mat[,1]
+  y<-mat[,2]
+  maxy<-max(y)
+  miny<-min(y)
+  plot(x,y,  xlim=c(0,1),ylim=c(miny, maxy),main=titleText)
+  Qmet<-quantile(x, probs=c(0.25,0.5,0.75))
+  reg<-lm(expr~bs(met,knots=Qmet, degree=2), data=mat)
+  #reg<-lm(expr~bs(met, df=5,intercept=FALSE), data=mat)
+  minval<-min(x)
+  maxval<-max(x)
+  u<-seq(minval,maxval,by=.1)
+  B<-data.frame(met=u)
+  Y<-predict(reg,newdata=B)
+  lines(u,Y,lwd=2,col="red")
+}
+
+#plot un gen
+#IdGene<-"FUCA2"
+#myTitle<-paste("Gene",IdGene, sep=" ")
+#mat<-ListGenes[[IdGene]]
+#plotWithSplines(mat,myTitle)
+
+#plot un grupo de genes
+#\begin{center}
+#opt <- par(mfrow=c(3,3), pty="m", oma=c(0,0,2,0), mar=c(5,4,2,2), font.main=1)
+#for (i in 1:9)  #plot dels 9 primers
+#{
+#  myTitle <- paste("Gene", namesGenesCor[i], sep=" ")
+#  mat<-ListGenes[[namesGenesCor[i]]]
+#    plotWithSplines(mat,myTitle)
+#}
+#par(opt)
+#\end{center}
+@
+La representación de los genes de cada cluster se encuentra  en los ficheros Cluster1...Cluster4 de la carpeta figuras.
+<<Grafico de los genes de cada cluster, echo=FALSE>>=
+for (i in 1:nclusters)
+{
+nameFile<-paste(graficsDir,"/Cluster",i,".pdf", sep="")  
+pdf(nameFile)
+opt<-par(mfrow=c(3,3), pty="m", oma=c(0,0,2,0), mar=c(5,4,2,2), font.main=1)
+GenesInCluster<-names(Hclustgroups[Hclustgroups==i])
+for (IdGene in GenesInCluster ) 
+{
+  myTitle<-paste("Gene",IdGene, sep=" ")
+  mat<-ListGenes[[IdGene]]
+  plotWithSplines(mat,myTitle)
+}
+dev.off()
+}
+@
+\end{center}
+
+Finalmente unimos los genes del cluster 1 y 2 ya que ambos corresponden al patrón de genes regulados por metilación tipo L. 
+Para realizar la comparación de ambos métodos realizamos las siguientes intersecciones: Cluster1 con CMI (Tall1) y la unión de Cluster 1 y 2 con CMI (Tall2).
+<<union>>=
+genescluster1 <- names(Hclustgroups[Hclustgroups==1])
+genescluster2 <- names(Hclustgroups[Hclustgroups==2])
+genescriteri3 <- genes.sel
+tall1 <- intersect(genescriteri3,genescluster1)
+tall2 <- intersect(genescriteri3,union(genescluster1,genescluster2))
+gensComuns <- list(tall1=tall1,tall2=tall2)
+length(tall1)
+length(tall2)
+@
+
+El gráfico de los genes de las intersecciones se guardarán en un fichero aparte en la carpeta figuras.
+
+<<Grafico de los genes de cada cluster, echo=FALSE>>=
+
+nameFile<-paste(graficsDir,"/Tall1",".pdf", sep="")  
+pdf(nameFile)
+opt<-par(mfrow=c(3,3), pty="m", oma=c(0,0,2,0), mar=c(5,4,2,2), font.main=1)
+GenesInPlot<-tall1
+for (IdGene in GenesInPlot ) 
+{
+  myTitle<-paste("Gene",IdGene, sep=" ")
+  mat<-ListGenes[[IdGene]]
+  plotWithSplines(mat,myTitle)
+}
+dev.off()
+
+nameFile<-paste(graficsDir,"/Tall2",".pdf", sep="")  
+pdf(nameFile)
+opt<-par(mfrow=c(3,3), pty="m", oma=c(0,0,2,0), mar=c(5,4,2,2), font.main=1)
+GenesInPlot<-tall2
+for (IdGene in GenesInPlot ) 
+{
+  myTitle<-paste("Gene",IdGene, sep=" ")
+  mat<-ListGenes[[IdGene]]
+  plotWithSplines(mat,myTitle)
+}
+dev.off()
+
+@
+
+\newpage
+
+\begin{thebibliography}{9}
+
+%\addcontentsline{toc}{chapter}{\numberline{}Bibliografía}
+
+\bibitem{r-project} R Development Core Team (2005). R: A language and environment for statistical computing, 
+reference index version 2.14.0. R Foundation for Statistical Computing, Vienna, Austria. ISBN 3-900051-07-0, \\ 
+\verb|http://www.R-project.org|
+
+
+
+
+\end{thebibliography}
+
+\end{document}

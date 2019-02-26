@@ -1,0 +1,924 @@
+% Aquest script fa el mateix que la versio anterior però he canviat 
+% les dades de TCGA que em va donar el Diego per les descarregades de cBioportal 
+% i les dades "TRUE" i "FALSE" de DA per les que he extret mostrejant
+
+% Un canvi de darrera hora ha estat que, enlloc de fer servir les dades ajustades a tres bandes ("3-way"), hem conclos que no ens acabem de refiar de les dades d'RNAseq. Això vol dir que no ens cal treballar amb les dades 3-way sino que n'hi ha prou amb les 2-way que en el cas de microarrays i RNA-seq coincideixen en 30 mostres, enlloc de'n 25.
+
+%També hem detectat un problema estrany consistent en que, en les dades de metilació que empravem, el gen que interessa al DIego, el ZBTB18, tenia els valors canviats, per la qual cosa hem pres dues decisions
+% - Fer un pas enrrere i basar-nos en les dades gravades en binari
+% - DEixar de fer servir les dadades de RNAseq (ja no ho feia) i basar l'anàlisi en les 30 linies celulars comunes entre Metilacio i Expressio enlloc de les 25 comunes entre els tres tipus de dades.
+
+\documentclass[a4paper,10pt]{article}
+\usepackage[T1]{fontenc}
+%\usepackage[utf8]{inputenc}
+%\usepackage[spanish]{babel}
+\usepackage{url}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{underscore}
+%\usepackage{graphicx}
+%\usepackage{pstricks}
+
+\setlength{\oddsidemargin}{0pt} \setlength{\evensidemargin}{0pt}
+\setlength{\marginparwidth}{1in} \setlength{\marginparsep}{0pt}
+
+\setlength{\topmargin}{0pt} \setlength{\headheight}{0pt}
+\setlength{\headsep}{0pt} \setlength{\topskip}{0pt}
+
+% \footheight 0pt
+% \footskip 0pt
+% A4 is 29,7301778cm x 21,0224103cm
+%     =  9,7047944in x 6,2765395in
+\setlength{\textheight}{24,6501778cm}
+\setlength{\textwidth}{15,9424103cm}
+
+\setlength{\parindent}{0pt}
+
+\pagestyle{plain}
+
+\title{Scatterplot analysis for the integrative analysis of expression and methylation data}
+\author{S\'anchez-Pla, Alex$^{1,3}$, Mir\'o, Berta$^3$, Carmona, Francesc$^1$, \\ Bazzoco, Sara$^2$, Arango, Diego$^2$\\
+  $^1$ Departament of Genetics Microbiology and Statistics, Universitat de Barcelona\\
+  $^2$ CIBBIM-Nanomedicine. Biomedical Research in Digestive Tumors, (VHIR), Barcelona\\
+  $^3$ Statistic and Bioinformatics Unit. Vall d'Hebron Research Institute.  (VHIR). Barcelona}
+\date{}
+
+\begin{document}
+
+<<include=FALSE>>=
+require(knitr)
+opts_chunk$set(
+concordance=FALSE, echo=TRUE, cache=TRUE, warning=FALSE, error=FALSE, message=FALSE)
+@
+
+\maketitle
+
+\thispagestyle{empty}
+
+\tableofcontents
+
+\section{Introduction}
+
+This document describes how to implement a pipeline for selecting L-shaped genes from two data matrices, an expression and a methylation matrix, matched by rows (genes) and columns(samples), using the algorithms implemented by the authors and described elsewhere.
+
+The idea is to "keep-it-simple" so that it the process can be followed by a non-technical reader. 
+
+The steps correpond roughly to what one user would do when exploring two expression-methylation datasets
+
+\begin{enumerate}
+  \item Data input: For each dataset
+  \begin{enumerate} 
+    \item Select (Load) expression values from a csv (or binary) file
+    \item Select (Load) methylation values from a csv  (or binary) file
+    \item Check that the data are well composed and matched
+  \end{enumerate}
+  \item For each selection method (Naïve, CMI, Heuristic)
+  \begin{enumerate}
+   \item Set parameters if needed)
+    \item Compute binary and numeric scores to for each gene
+    \item Output result in tab format: geneId, NumScore, binScore
+  \end{enumerate}
+  This will yield a results table (a list) for each method.
+  \item Define consensus list of l-shaped genes (e.g. by intersection or union or selection of output L-lists)
+  \item Plot consensus lists scatterplots
+  \item Compute genome positions of selected genes and
+  \begin{enumerate}
+  \item Plot genes in chromosome
+  \item Add gene positions to results table
+  \end{enumerate}
+  \item Do enrichment analysis of the selecte gene list
+\end{enumerate}
+
+<<directoris, echo=FALSE, eval=TRUE>>=
+options(digits=4)
+workingDir <- getwd()
+dadesDir <-  file.path(workingDir, "dades")
+codeDir <-  file.path(workingDir, "Rcode")
+resultsDir <- file.path(workingDir, "results")
+@ 
+
+<<installifnot, echo=FALSE, eval=TRUE>>=
+installBiocifnot <- function(pckgName){
+  if (!(require(pckgName, character.only = TRUE))) {
+    source("http://Bioconductor.org/biocLite.R")
+    biocLite(pckgName)
+    require(pckgName, character.only = TRUE)
+  }
+}
+
+installifnot <- function(pckgName){
+  if (!(require(pckgName, character.only = TRUE))) {
+    install.packages(pckgName, dep = TRUE)
+    require(pckgName, character.only = TRUE)
+  }
+}
+
+installGitifnot <- function(pathGit, pckgName, proxy = FALSE, urlproxy = "conf_www.ir.vhebron.net", portproxy = 8081, force.install = FALSE){
+  if (!(require(pckgName, character.only = TRUE)) | force.install) {
+    installifnot("devtools")
+    # require(curl)
+    if (proxy) set_config(use_proxy(url = urlproxy, port = portproxy)) 
+    install_github(file.path(pathGit,pckgName), force = force.install)
+    require(pckgName, character.only = TRUE)
+  }
+}
+# Example 
+# installGitifnot("miriammota","mmotaF",force.install = TRUE)
+@
+
+
+<<loadpackages1, echo=FALSE, eval=TRUE>>=
+installifnot("knitr")
+installifnot("VennDiagram")
+installifnot("Hmisc")
+installifnot("energy")
+installGitifnot("alexsanchezpla","links2File",force.install = TRUE)
+@
+
+<<loadpackages2, echo=FALSE, eval=TRUE>>=
+futile.logger::flog.threshold(futile.logger::ERROR, name = "VennDiagramLogger")
+# installBiocifnot("goProfiles")
+installBiocifnot("Homo.sapiens")
+installBiocifnot("TxDb.Hsapiens.UCSC.hg19.knownGene")
+installBiocifnot("hgu133plus2.db")
+installBiocifnot("Gviz")
+installifnot("gtools")
+installBiocifnot("GenomicRanges")
+@
+
+<<carregaFuncts, echo=FALSE, eval=TRUE>>=
+source("Rcode/correlationFunctions.R")
+source("Rcode/cmiFunctions.R")
+source("Rcode/gridFunctions.R")
+source("Rcode/annotationFunctions.R")
+@
+
+<<crealinksFile>>=
+addToLinksFile("GRMSelectionPipeline.csv", "Informe")
+@
+
+\section{Datasets used for the study}
+
+\subsection{On the preprocessing and selection of the researcher's data}
+
+In a first version of this analysis the data for microarrays, RNAseq and methylation were used. 
+
+In further analyses we have concluded that RNAseq data were less reliable than microarray data so that we decided to omit RNAseq data from then on. 
+
+As a consequence we can use what we called "2 way data" that is, data that have been matched by pairs which have 30 instead of 25 samples.
+
+The preprocessing of the data of microarrays and methylation was done in 3 processes:
+\begin{enumerate}
+\item \texttt{CorrelationAnalysis0New-ReadAndPreprocessDataV2}
+\item  \texttt{CorrelationAnalysis1NEW-MatchData}
+\item \texttt{CorrelationAnalysis2NEW-ComputeCorrs}
+\end{enumerate}
+
+The analysis performed in \texttt{CorrelationAnalysis0New-ReadAndPreprocessDataV2} has produced two methylation datasets. One where cpgs have been unitized to genes by averaging their values and another where this has been done by taking the probe with highest variance.
+
+The analysis performed in \texttt{CorrelationAnalysis1NEW-MatchData}
+has selected common genes and common samples between methylation and microarray data. Datasets \texttt{dataMarrCR2}, \texttt{dataMethCR2} and \texttt{dataMethVarCR2} contain microarray expression and methylation (unitized by mean and by variance) data matched by gene and samples. These datasets have been saved into a binary file: \texttt{matchedMarrRNAseqMethDataByPAIRS.Rda} and written separately to files \texttt{matched2MicroarrayData.csv}, \texttt{matched2MethylationData.csv} and \texttt{matched2MethVar.csv}.
+
+\textbf{These will be the datasets used as "researcher's data in the analyses}
+
+\subsection{Colon Cancer datasets}
+
+There are three\footnote{An RNAseq dataset was also available but we decided not to use it because we were unsure of how reliable the values were} datasets available for analysis obtained from three sources. The first dataset has been obtained by the researcher, (Diego Arango) and will be named as \texttt{DA}. A second one, which we name as \texttt{GEO}, has been extracted from the Gene Expression Omnibus and the third dataset is the Colon Cancer dataset from The Cancer Genome Atlas project and will be designated as \texttt{TCGA}.
+
+\begin{enumerate}
+  \item \texttt{DA}: Expression microarrays (\texttt{matched2MicroarrayData.csv}) and Illumina 25k methylation arrays (\texttt{matched2MicroarrayData.csv}) on 30 cell llines.
+  \item \texttt{GEO}: Expression microarrays (\texttt{geoMicroarrays.csv}) and Illumina 25k methylation arrays (\texttt{geoMetilacion.csv}) on 25 CRC samples.
+\item  TCGA. Expression microarrays (\texttt{TCGAExprData.csv}) and Illumina 25k methylation arrays (\texttt{TCGAMetilData.csv}) on 426 Colon Adenocarcinoma (\texttt{COAD} dataset) samples from TCGA.
+\end{enumerate}
+
+A summary of each datasets follows below:
+\begin{itemize}
+\item \texttt{DA} dataset has been provided by the researcher (DA=``Diego Arango'') and is the original dataset on which it was intended to select L-shaped  genes.
+
+<<readDataDA, eval=TRUE>>=
+require(printr)
+load("../DataSets/combined/matchedMarrRNAseqMethDataByPAIRS.Rda")
+DAExprData <- as.matrix(dataMarrCR2)
+DAMetilData <- as.matrix(dataMethCR2)
+rm(dataMarrCR0,dataMarrCR2, dataMethCR1, dataMethCR2, dataMethVarCR1, dataMethVarCR2, dataRNAseqCR0, dataRNAseqCR0CS, dataRNAseqCR1, dataRNAseqCR1CS) # clean files loaded with the desired files
+# DAExprData <- as.matrix(read.table(file=file.path(dadesDir,"DatosMicroarrays.csv"), header=TRUE, sep=";", dec=",", row.names = 1))
+# DAMetilData <- as.matrix(read.table(file=file.path(dadesDir,"DatosMetilacion.csv"), header=TRUE, sep=";",dec=",", row.names = 1))
+# DARNAseqData <- as.matrix(read.table(file=file.path(dadesDir,"DatosRNAseq.csv"), header=TRUE, sep=";",dec=",", row.names = 1))
+cat("DA Microarray data : ", dim(DAExprData), "\n")
+cat("DA Methylation data: ", dim(DAMetilData), "\n")
+# cat("DA RNASeq data     : ", dim(DARNAseqData), "\n")
+@
+
+\item \texttt{geo} dataset is formed by data from expression microarrays (Illumina beadchips, \texttt{geoMicroarrays.csv}) and methylation array (Illumina 25kMethArray, \texttt{geoMetilacion.csv}) on 25 CRC samples. The data have been collected from the GEO database records: GSE25062 for the methylation data and GSE25070 for the expression data. The dataset has been created by taking the expression values available for 26 CRC tumors and matching with their corresponding methylation values.
+
+<<readGEOdata, eval=TRUE>>=
+geoExprData <-  as.matrix(read.table(file=file.path(dadesDir,"GEOExpData.csv"), header=TRUE, sep=";", dec="."))
+geoMetilData <-  as.matrix(read.table(file=file.path(dadesDir,"GEOMethData.csv"), header=TRUE, sep=";", dec="."))
+cat("GEO Microarray data : ", dim(geoExprData), "\n")
+cat("GEO Methylation data: ", dim(geoMetilData), "\n")
+@
+
+\item \texttt{TCGA} dataset has been obtained from The Cancer Genome Atlas Database (TCGA) (Colon Adenocarcinoma (\texttt{COAD}) Nature 2012 dataset) and downloaded through the cBioportal website.
+
+<<readTCGAdata, eval=TRUE>>=
+TCGAExprData <-  as.matrix(read.table(file="dades/TCGA-cBioPortal-Expressions.csv", header=TRUE, sep=",", dec=".", row.names=1))
+TCGAMetilData <-  as.matrix(read.csv(file="dades/TCGA-cBioPortal-Methylations.csv", header=TRUE, sep=",", dec=".", row.names=1))
+cat("TCGA Microarray data : ", dim(TCGAExprData), "\n")
+cat("TCGA Methylation data: ", dim(TCGAMetilData), "\n")
+@
+\end{itemize}
+
+<<inCommon, eval=TRUE>>=
+inCommon<- length(intersect(rownames(DAExprData), rownames(geoExprData)))
+inCommon2 <- length(intersect(rownames(DAExprData), rownames(TCGAExprData)))
+inCommon3 <- length(intersect(rownames(geoExprData), rownames(TCGAExprData)))
+@
+
+There are \Sexpr{inCommon} genes in common between the DAX dataset and the GEO datasets. There are \Sexpr{inCommon2} common genes between the DAX dataset and the TCGA dataset and \Sexpr{inCommon3} common genes between the GEO dataset and the TCGA dataset.
+
+This can be visualized using a Venn diagram
+<<vennCommonGenesin3lists>>=
+myVenn4 <- venn.diagram(x=list(DA=rownames(DAExprData), 
+                              GEO=rownames(geoExprData),
+                              TCGA=rownames(TCGAExprData)), 
+                              filename=NULL, lty = "blank",  
+                              fill=c("pink1", "skyblue", "mediumorchid"),
+                       main="Genes in common between the three datasets")
+grid.newpage()
+grid.draw(myVenn4)
+@
+
+\subsection{TRUE and FALSE 'L-shaped' genes}
+
+A problem with this study is that truly or falsely positive L-shaped genes are not known.
+
+In the absence of this a list of \emph{apparently truly positive} and \emph{apparently truly negative} genes has been provided by the researcher.
+
+<<trueAndFalseL, eval=TRUE>>=
+# Genes True i False
+trueLGeneDF <-read.table("dades/genesTrueLNEW.txt")
+(trueLGeneNames <- as.character(trueLGeneDF[,1]))
+falseLGeneDF <- read.table("dades/genesFalseLNEW.txt")
+(falseLGeneNames <- as.character(falseLGeneDF[,1]))
+
+trueLExpr <- DAExprData[rownames(DAExprData) %in% trueLGeneNames ,]
+falseLExpr <- DAExprData[rownames(DAExprData) %in% falseLGeneNames ,]
+trueLMet <- DAMetilData[rownames(DAMetilData) %in% trueLGeneNames ,]
+falseLMet <- DAMetilData[rownames(DAMetilData) %in% falseLGeneNames ,]
+DATrueFalseExpr <- as.matrix(rbind(trueLExpr, falseLExpr))
+DATrueFalseMet <- as.matrix(rbind(trueLMet, falseLMet))
+@
+
+
+\subsection{Additional data checks}
+
+The data for these analyses must have a common structure: \textbf{Each pair of matrices (Expression-Methylation) must have the same rome and column names}, that is both datasets must contain information for the same genes and same samples at their corresponding positions.
+
+This can be checked using a simple function such as \texttt{checkData} available in the package.
+<<checkData>>=
+try(if(!checkPairing(DAExprData, DAMetilData)) stop("Row names and/or column names do not match"))
+try(if(!checkPairing(geoExprData, geoMetilData)) stop("Row names and/or column names do not match"))
+try(if(!checkPairing(TCGAExprData, TCGAMetilData)) stop("Row names and/or column names do not match"))
+try(if(!checkPairing(trueLExpr, trueLMet)) stop("Row names and/or column names do not match"))
+try(if(!checkPairing(falseLExpr, falseLMet)) stop("Row names and/or column names do not match"))
+try(if(!checkPairing(DATrueFalseExpr, DATrueFalseMet)) stop("Row names and/or column names do not match"))
+@
+
+\section{Selection of L-shaped genes}
+\subsection{Methods}
+After a long process of trial and error we consider that there are three ``best'' approaches for selecting L-shaped genes. The methods are extensively described in another document so only a brief description is provided below:
+\begin{enumerate}
+  \item \textbf{Naive}: A gene is called L-shaped if Methylation and expression are significantly negatively correlated. 
+  \item \textbf{CMI}: A gene is called L-Shaped if the \emph{Conditional Mutual Information} (CMI) of the expression and methylation values computed at different points between 0 and 1 reaches a minimum  which is small enough according predefined thresholds. This minimum can be considered to be the cutoff for methylation.
+  \item \textbf{Heuristic}: A gene is called L-shaped if the majority of the points of the scatterplot stay on the left and lower cells of a $3\times3$ grid. How many values can deviate from this "majority" in each cell can be tuned by the user.
+\end{enumerate}
+
+\subsection{Selecting L-shaped genes with the Naive method}
+
+A gene is called L-shaped if methylation and expression are significantly negatively correlated. If the number of samples is big, as in the TCGA dataset, many genes will be significantly correlated. In these cases it may be worth to set an additional threshold such as $r < -0.XXX$ where $-0.XXX$ is a threshold to be set by the user. A trial and error process suggests that a -0.5 cutoff may be appropriate
+
+<<naiveSelection>>=
+#calcAgain <- TRUE
+#if (!file.exists("results/naiveSelections.Rda") || calcAgain){
+naiveDA <- naiveSelection (DAExprData, DAMetilData, pValCutoff=0.25, rCutoff=-0.5, type="Spearman",adj=TRUE)
+selectedNaiveDA <-naiveDA[naiveDA$SigNegCorr,] 
+@
+
+<<naiveSelectionGEO>>=
+    naiveGEO <- naiveSelection (geoExprData, geoMetilData, pValCutoff=0.25,  rCutoff=-0.5, type="Spearman", adj=TRUE)
+    selectedNaiveGEO <-naiveGEO[naiveGEO$SigNegCorr,] 
+@
+<<naiveSelectionTCGA>>=
+naiveTCGA <- naiveSelection (TCGAExprData, TCGAMetilData, pValCutoff=0.25,  rCutoff=-0.5, type="Spearman", adj=TRUE)
+selectedNaiveTCGA <-naiveTCGA[naiveTCGA$SigNegCorr,] 
+@
+
+<<saveNaive>>=
+save(naiveDA, naiveGEO, naiveTCGA,
+         selectedNaiveDA, selectedNaiveGEO, selectedNaiveTCGA, 
+         file="results/naiveSelections.Rda")
+
+selectedGenesNaiveDA <- rownames(selectedNaiveDA)
+selectedGenesNaiveGEO <- rownames(selectedNaiveGEO)
+selectedGenesNaiveTCGA <- rownames(selectedNaiveTCGA)
+save(selectedGenesNaiveDA,
+         selectedGenesNaiveGEO, 
+         selectedGenesNaiveTCGA, 
+         file="results/naiveSelectionsGeneNames.Rda")
+  # }else{
+  #  load("results/naiveSelections.Rda")
+  #  load("results/naiveSelectionsGeneNames.Rda")
+  #}
+@
+
+<<numNaiveSelected>>=
+ numNaiveDA <- sum(naiveDA$SigNegCorr)
+ numNaiveGEO <- sum(naiveGEO$SigNegCorr)
+ numNaiveTCGA <- sum(naiveTCGA$SigNegCorr)
+@
+
+The distribution of the correlation coefficients of the selected genes is shown in figure \ref{showCorrs1}
+
+\begin{figure}[htbp]
+<<showCorrs>>=
+opt<-par(mfrow=c(2,2))
+hist(selectedNaiveDA[,1], xlim=c(-1,0), main="Significant correlations in DA dataset")
+hist(selectedNaiveGEO[,1], xlim=c(-1,0), main="Significant correlations in GEO dataset")
+hist(selectedNaiveTCGA[,1], xlim=c(-1,0), main="Significant correlations in TCGA dataset")
+par(opt)
+@
+\caption{Distribution of the correlation coefficients of the selected genes. Depending on the `pvalue` and the `r` cutoff more or less genes will be retained\label{showCorrs1}}
+\end{figure}
+
+The number of genes selected using the Naive method on the DA, TCGA and GEO datasets are respectively:
+<<showSelectedNaif>>=
+cat("numNaive (DA): ", numNaiveDA,"\n")
+cat("numNaive (GEO): ", numNaiveGEO,"\n")
+cat("numNaive (TCGA): ", numNaiveTCGA,"\n")
+@
+
+This can be visualized using Venn Diagrams:
+
+<<vennCommonGenesin3listsNaive>>=
+myVenn3<- venn.diagram(x=list(naiveDA=rownames(selectedNaiveDA), 
+                              naiveGEO=rownames(selectedNaiveGEO),
+                              naiveTCGA=rownames(selectedNaiveTCGA)), 
+                              filename=NULL, lty = "blank",  
+                              fill=c("pink1", "skyblue", "mediumorchid"),
+                       main="Genes in common between the three -Naive selected- gene lists")
+grid.newpage()
+grid.draw(myVenn3)
+@
+
+\subsubsection{Naive selection on TRUE and FALSE candidates}
+
+<<naiveSelTrueFalse>>=
+naiveDATrueFalse <- naiveSelection (as.matrix(DATrueFalseExpr), as.matrix(DATrueFalseMet), pValCutoff= 0.25, rCutoff=0, type="Spearman", adj=TRUE)
+selectedNaiveDATrueFalse <-naiveDATrueFalse[naiveDATrueFalse$SigNegCorr,] 
+myVenn2<- venn.diagram(x=list(naiveDATrueFalse=rownames(selectedNaiveDATrueFalse), TRUEL=trueLGeneNames), filename=NULL, lty = "blank",  fill=c("pink1", "skyblue"), main="Genes in common between TRUE L and -Naive selected from TRUE/FALSE- gene lists")
+grid.newpage()
+grid.draw(myVenn2)
+
+myVenn2<- venn.diagram(x=list(naiveDATrueFalse=rownames(selectedNaiveDATrueFalse), 
+                              FALSEL=falseLGeneNames),
+                              filename=NULL, lty = "blank",  
+                              fill=c("pink1", "skyblue"),
+                       main="Genes in common between FALSE L and -Naive selected from TRUE/FALSE- gene lists")
+grid.newpage()
+grid.draw(myVenn2)
+@
+
+\emph{It seems that both TRUE and FALSE L candidates are mostly negatively correlated}.
+
+
+\subsection{Selecting L-shaped genes with the CMI method}
+
+% As of 2017-08 the function for selecting genes based on CMI has experienced some problems so that instead of recomputing CMI based selection for all three gene sets we have recovered this gene list from a previous study
+
+<<cmiSelection>>=
+calcAgainCMI <- FALSE
+if (!file.exists("results/naiveSelections.Rda") || calcAgainCMI){
+  system.time(cmiDA <- cmiSelection (methData = DAMetilData, exprData = DAExprData ))
+  selectedCmiDA <-cmiDA[cmiDA[,"meth_regulated"],] 
+  system.time(cmiGEO <- cmiSelection (methData = geoMetilData, exprData = geoExprData))
+  selectedCmiGEO <-cmiGEO[cmiGEO[,"meth_regulated"],] 
+  system.time(cmiTCGA <- cmiSelection (methData = TCGAMetilData, exprData = TCGAExprData))
+  selectedCmiTCGA <-cmiTCGA[cmiTCGA[,"meth_regulated"],] 
+  save(cmiDA, cmiGEO, cmiTCGA,
+         selectedCmiDA, selectedCmiGEO, selectedCmiTCGA, 
+         file="results/cmiSelections.Rda")
+  selectedGenesCmiDA <- rownames(selectedCmiDA)
+  selectedGenesCmiGEO <- rownames(selectedCmiGEO)
+  selectedGenesCmiTCGA <- rownames(selectedCmiTCGA)
+  save(selectedGenesCmiDA, selectedGenesCmiGEO, selectedGenesCmiTCGA,
+         file="results/cmiSelectionsGeneNames.Rda")
+}else{
+    load("results.bak/cmiSelections.Rda")
+    load("results.bak/cmiSelectionsGeneNames.Rda")
+}
+@
+
+The number of genes selected using the CMI method on the DA, TCGA and GEO datasets are respectively 
+ \Sexpr{nrow(selectedCmiDA)}, \Sexpr{nrow(selectedCmiGEO)} and \Sexpr{nrow(selectedCmiTCGA)}.
+
+
+This can be visualized using Venn Diagrams:
+
+<<vennCommonGenesin3listsCMI>>=
+myVenn3<- venn.diagram(x=list(cmiDA=rownames(selectedCmiDA), 
+                              cmiGEO=rownames(selectedCmiGEO),
+                              cmiTCGA=rownames(selectedCmiTCGA)), 
+                              filename=NULL, lty = "blank",  
+                              fill=c("pink1", "skyblue", "mediumorchid"),
+                       main="Genes in common between the three -CMI selected- gene lists")
+grid.newpage()
+grid.draw(myVenn3)
+@
+
+\subsubsection{CMI selection on TRUE and FALSE candidates}
+
+<<cmiSelTrue>>=
+cmiDATrueFalse <- cmiSelection (DATrueFalseExpr, DATrueFalseMet)
+selectedCmiDATrueFalse <-cmiDATrueFalse[cmiDATrueFalse[,"meth_regulated"],] 
+
+myVenn2<- venn.diagram(x=list(cmiDA=rownames(selectedCmiDA), 
+                              TRUEL=trueLGeneNames),
+                              filename=NULL, lty = "blank",  
+                              fill=c("pink1", "skyblue"),
+                       main="Genes in common between TRUE L and -CMI selected- gene lists")
+grid.newpage()
+grid.draw(myVenn2)
+@
+
+<<cmiSelFalse>>=
+myVenn2<- venn.diagram(x=list(cmiDA=rownames(selectedCmiDA), 
+                              falseL=falseLGeneNames),
+                              filename=NULL, lty = "blank",  
+                              fill=c("pink1", "skyblue"),
+                       main="Genes in common between FALSE L and -CMI selected- gene lists")
+grid.newpage()
+grid.draw(myVenn2)
+@
+
+In this case it seems that the CMI method has selected more genes from the TRUE than from the FALSE example list.
+
+
+\subsection{Selecting L-shaped genes with the \emph{heuristic} method}
+
+The heuristic method is intended to select L-shaped scatterplots by overimposing a grid on it and defining certain regions which have to (or don't have to) contain a minimum (or maximum) percentage of points if the scatterplot is to be called L--shaped.
+
+Besides this the method computes a scoring in such a way that scores in "good regions" score positively and points in "bad regions" score negatively. \emph{\textbf{An appropriate setting of scores and weights should yield positive scores for L-shaped scatterplots and negative scores for those that are not}}. 
+
+One of the main interests of the approach presented here is the possibility to ``tune'' the selection process by changing the scoring parameters.
+
+<<setParameters>>=
+(reqPercentages   <- matrix (c(10, 20, 1, 5, 40, 20, 0, 5, 10), nrow=3, byrow=TRUE))
+(maxminCounts <- toReqMat(dim(DAMetilData)[2], reqPercentages)) # Informative. NOt used in calculations because it is computed within the loop
+
+(reqPercentages4TCGA <- matrix (c(4, 20, 5, 1, 40, 20, 0, 1, 4), nrow=3, byrow=TRUE))
+(maxminCounts4TCGA <- toReqMat(dim(TCGAMetilData)[2], reqPercentages4TCGA))
+
+(theWeightMifL=matrix (c(2,-2,-25,1,0,-2,1,1,2), nrow=3, byrow=TRUE))
+(theWeightMifNonL=matrix (c(0,-2,-25,0,0,-2,0,0,0), nrow=3, byrow=TRUE))
+@
+
+<<heuristicLGenesFromDA>>=
+calcAgainHeuristic <- FALSE # Com donava error l'he calculat pas a pas i he gravat els resultats
+if (!file.exists("results/heuristicSelections.Rda") || calcAgainHeuristic){
+  # DA dataset
+  sampleSize <- dim(DAMetilData)[2]
+  numGenes <-   dim(DAMetilData)[1]
+
+  messageTitle("Scoring ALL genes in the DA (microarrays) dataset")
+
+  scoresDA1 <- scoreGenesMat (mets=DAMetilData, 
+							              expres=DAExprData, 
+                            aReqPercentsMat=reqPercentages, 
+                            aWeightMifL=theWeightMifL, 
+                            aWeightMifNonL=theWeightMifNonL )
+  cat("Number of scatterplots scored  : ", dim(scoresDA1)[1],"\n")
+  cat("Number of L-shape scatterplots : ", sum(scoresDA1[,1]),"\n")
+  head(scoresDA1)
+  table(scoresDA1[,1])
+  selectedHeuristicDA <- scoresDA1[scoresDA1$logicSc,]
+
+  #GEO dataset
+  messageTitle("Scoring ALL genes in the GEO dataset")
+  sampleSize <- dim(geoMetilData)[2]
+  scoresGEO <- scoreGenesMat (mets=geoMetilData, 
+                            expres=geoExprData, 
+                            aReqPercentsMat=reqPercentages, 
+                            aWeightMifL=theWeightMifL, 
+                            aWeightMifNonL=theWeightMifNonL )
+  cat("Number of scatterplots scored  : ", dim(scoresGEO)[1], "\n")
+  cat("Number of L-shape scatterplots : ", sum(scoresGEO[,1]), "\n")
+  table(scoresGEO[,1])
+  selectedHeuristicGEO <- scoresGEO[scoresGEO$logicSc,]
+  
+  #TCGA dataset
+  (numGenes <-   dim(TCGAMetilData)[1])
+  (sampleSize <- dim(TCGAMetilData)[2])
+ 
+  reqPercentages <- matrix (c(2, 20, 5, 1, 40, 20, 0, 1, 2), nrow=3, byrow=TRUE)
+  (maxminCounts <- toReqMat(sampleSize, reqPercentages))
+
+  (theWeightMifL=matrix (c(2,-2,-sampleSize/5,1,0,-2,1,1,2), nrow=3, byrow=TRUE))
+  (theWeightMifNonL=matrix (c(0,-2,-sampleSize/5,0,0,-2,0,0,0), nrow=3, byrow=TRUE))
+
+  messageTitle("Scoring ALL genes in the TCGA (microarrays) dataset")
+  scoresTCGA <- scoreGenesMat (mets=TCGAMetilData, 
+							              expres=TCGAExprData, 
+							               x1=1/3, x2=2/3,
+                            aReqPercentsMat=reqPercentages, 
+                            aWeightMifL=theWeightMifL, 
+                            aWeightMifNonL=theWeightMifNonL )
+  cat("Number of scatterplots scored  : ", dim(scoresTCGA)[1],"\n")
+  cat("Number of L-shape scatterplots : ", sum(scoresTCGA[,1]),"\n")
+  head(scoresTCGA)
+  table(scoresTCGA[,1])
+  selectedHeuristicTCGA <- scoresTCGA[scoresTCGA$logicSc,]
+  
+  save(scoresDA1, scoresGEO, scoresTCGA, 
+       selectedHeuristicDA, selectedHeuristicGEO, selectedHeuristicTCGA, 
+         file="results/heuristicSelections.Rda")
+  selectedGenesHeuristicDA <- rownames(selectedHeuristicDA)
+  selectedGenesHeuristicGEO <- rownames(selectedHeuristicGEO)
+  selectedGenesHeuristicTCGA <- rownames(selectedHeuristicTCGA)
+  save(selectedGenesHeuristicDA,selectedGenesHeuristicGEO, selectedGenesHeuristicTCGA, file="results/heuristicSelectionsGeneNames.Rda")
+}else{
+    load("results/heuristicSelections.Rda")
+   load("results/heuristicSelectionsGeneNames.Rda")
+}
+
+@
+
+
+We may select L genes and plot only these.
+The resulting plots are available in files 
+\begin{itemize}
+  \item \texttt{DAExprLGenesScores.pdf}
+  \item \texttt{GEOLGenesScores.pdf}
+  \item \texttt{TCGALGenesScores.pdf}
+\end{itemize}
+
+<<selectLGenes1>>=
+LgenesDAExpr <- DAExprData[scoresDA1[,"logicSc"],]
+dim(LgenesDAExpr)
+geneListLDAExpr <- rownames(DAExprData[scoresDA1[,"logicSc"],])
+plotGenesMat (mets=DAMetilData[geneListLDAExpr,], 
+              expres=DAExprData[geneListLDAExpr,], 
+              fileName ="results/DAExprLGenesScores.pdf",
+              text4Title = scoresDA1[geneListLDAExpr,"numericSc"]) 
+
+LgenesGEOExpr <- geoExprData[scoresGEO[,"logicSc"],]
+dim(LgenesGEOExpr)
+geneListLGEOExpr <- rownames(geoExprData[scoresGEO[,"logicSc"],])
+plotGenesMat (mets=geoMetilData[geneListLGEOExpr,], 
+              expres=geoExprData[geneListLGEOExpr,], 
+              fileName ="results/geoExprLGenesScores.pdf",
+              text4Title = scoresGEO[geneListLGEOExpr,"numericSc"]) 
+
+myVenn2<- venn.diagram(x=list(DAMicroarrays=geneListLDAExpr, 
+                              GEO=geneListLGEOExpr), 
+                              filename=NULL, lty = "blank",  
+                              fill=c("pink1", "skyblue"))
+grid.newpage()
+grid.draw(myVenn2)
+
+LgenesTCGAExpr <- TCGAExprData[scoresTCGA$numericSc >100, ]
+dim(LgenesTCGAExpr)
+geneListLTCGAExpr <- rownames(TCGAExprData[scoresTCGA$numericSc >100, ])
+
+
+myVenn3<- venn.diagram(x=list(DAMicroarrays=geneListLDAExpr, 
+                              TCGA=geneListLTCGAExpr), 
+                              filename=NULL, lty = "blank",  
+                              fill=c("pink1", "skyblue"))
+grid.newpage()
+grid.draw(myVenn3)
+
+myVenn4<- venn.diagram(x=list(DAMicroarrays=geneListLDAExpr, 
+                              GEO=geneListLGEOExpr,
+                              TCGA=geneListLTCGAExpr), 
+                              filename=NULL, lty = "blank",  
+                              fill=c("pink1", "skyblue", "mediumorchid"))
+grid.newpage()
+grid.draw(myVenn4)
+@
+
+\section{Comparison between the selected lists}
+
+What is the level of concordance between the three methods? This obviously may depend on the parameters of each method but for the values set her we obtain the following coincidences.
+
+<<compare3DA>>=
+myVenn3DA<- venn.diagram(x=list(naiveDA=rownames(selectedNaiveDA), 
+                                cmiDA=rownames(selectedCmiDA), 
+                                heuristicDA = rownames(selectedHeuristicDA)), 
+                                filename=NULL, lty = "blank",  
+                                fill=c("pink1", "skyblue", "mediumorchid"),
+                       main="Genes in common between the 3 methods in DA dataset")
+grid.newpage()
+grid.draw(myVenn3DA)
+@
+
+<<compare3GEO>>=
+myVenn3GEO<- venn.diagram(x=list(naiveGEO=rownames(selectedNaiveGEO), 
+                                cmiGEO=rownames(selectedCmiGEO), 
+                                heuristicGEO = rownames(selectedHeuristicGEO)), 
+                                filename=NULL, lty = "blank",  
+                                fill=c("pink1", "skyblue", "mediumorchid"),
+                       main="Genes in common between the 3 methods in GEO dataset")
+grid.newpage()
+grid.draw(myVenn3GEO)
+@
+
+<<compare3TCGA>>=
+myVenn3TCGA <- venn.diagram(x=list(naiveTCGA=rownames(selectedNaiveTCGA), 
+                                cmiTCGA=rownames(selectedCmiTCGA), 
+                                heuristicTCGA = rownames(selectedHeuristicTCGA)), 
+                                filename=NULL, lty = "blank",  
+                                fill=c("pink1", "skyblue", "mediumorchid"),
+                       main="Genes in common between the 3 methods in TCGA dataset")
+grid.newpage()
+grid.draw(myVenn3TCGA)
+@
+
+\subsection{Common results}
+
+A simple way to facilitat the comparison between the different scores and classifications provided by the distinct methods is simply to align these scores in a tabular format.
+
+<<alltogether>>=
+if (!exists ("naiveDA"))
+  load("results/naiveSelections.Rda") 
+if (!exists ("cmiDA"))
+  load("results/cmiSelections.Rda")    
+if (!exists ("scoresDA1"))
+  load("results/heuristicSelections.Rda")
+dim(naiveDA); head(naiveDA)
+dim(cmiDA); head(cmiDA)
+dim(scoresDA1); head(scoresDA1)
+
+DAvalues <- cbind(naiveDA, cmiDA, scoresDA1);
+head(DAvalues)
+GEOvalues <- cbind(naiveGEO, cmiGEO, scoresGEO)
+head(GEOvalues)
+TCGAvalues <- cbind(naiveTCGA, cmiTCGA, scoresTCGA)
+head(TCGAvalues)
+write.csv(DAvalues, file="results/LshapeScoresDA.csv")
+write.csv(GEOvalues, file="results/LshapeScoresGEO.csv")
+write.csv(TCGAvalues, file="results/LshapeScoresTCGA.csv")
+# require(WriteXLS)
+# WriteXLS(x=c("DAvalues", "GEOvalues", "TCGAvalues"), ExcelFileName = "results/LshapeScores.xls")
+@
+
+\subsection{Plotting expression-methylation scaterplots}
+
+The best way to decide if a gene can be called L--shaped is to look at the methylation--expression scatterplot.
+Once we have computed the distinct scores we can combine these with the plots as shown below.
+
+\begin{itemize}
+  \item \texttt{DAExprAllScores.pdf}
+  \item \texttt{DARNAseqLGenesScores.pdf}
+  \item \texttt{GEOLGenesScores.pdf}
+\end{itemize}
+
+<<recallData>>=
+if (!(exists("DAMetilData"))) 
+  load(file="dades/DataMatrices-DA.Rda")
+if (!(exists("geoMetilData"))) 
+  load(file="dades/DataMatrices-GEO.Rda")
+if (!(exists("TCGAMetilData"))) 
+  load(file="dades/DataMatrices-TCGA.Rda")
+@
+
+<<recallScores>>=
+if (!exists("DAvalues")) 
+  DAvalues<- read.csv(file="results/LshapeScoresDA.csv", row.names = 1)
+DAscores4plots <- DAvalues[,c(1,3,10,11)]
+if (!exists("GEOvalues")) 
+  GEOvalues<- read.csv(file="results/LshapeScoresGEO.csv", row.names = 1)
+GEOscores4plots <- GEOvalues[,c(1,3,10,11)]
+if (!exists("TCGAvalues")) 
+  TCGAvalues<- read.csv(file="results/LshapeScoresTCGA.csv", row.names = 1)
+TCGAscores4plots <- TCGAvalues[,c(1,3,10,11)]
+formatScores <- function(x){
+  paste( "\n", "r(Sp)=", round(x[1], 4) , "; adj-p=", round(x[2],5),"\n", "Heur-L=", as.logical(x[3]), "; Heur-score=", x[4])
+  }
+
+DAscores<- apply(DAscores4plots,1, formatScores) # head(DAscores)
+GEOscores<- apply(GEOscores4plots,1, formatScores) # head(GEOscores)
+TCGAscores<- apply(TCGAscores4plots,1, formatScores) # head(TCGAscores)
+@
+
+<<plotALlGEnes>>=
+replot <- TRUE
+if(replot){
+      plotGenesMat (mets=DAMetilData, 
+              expres=DAExprData, 
+              fileName = "results/DAExprAllScores.pdf", 
+              text4Title = DAscores) 
+      plotGenesMat (mets=geoMetilData, 
+              expres=geoExprData, 
+              fileName ="results/GEOLGenesScores.pdf", 
+              text4Title = GEOscores) 
+      plotGenesMat (mets=TCGAMetilData, 
+              expres=TCGAExprData, 
+              fileName = "results/TCGALGenesScores.pdf", 
+              text4Title = TCGAscores) 
+  }
+@
+
+
+\section{Locating genes along the genome}
+
+It is known that methylation happens at some specific regions in the genome (``cpG islands'') more often than in other places (sometimes called ``oceans'').
+We would like to know if genes that have been found to be regulated by methylation \emph{in this study} are located at random in the genome or, alternatively, they concentrate in specific regions.
+
+Altogether after applying the three methods --naive, cmi, heuristic-- to the three datasets --DA, GEO, TCGA-- we have selected 9 gene lists. 
+
+\subsection{Annotating the genes in the chromosomes}
+
+Each gene list can be annotated with the positions of the genes in the chromosomes using the human reference genome assembly \texttt{hg19}, of UCSC (University of California, Santa Cruz) through the bioconductor packages, \texttt{Homo.sapiens} and \texttt{TxDb.Hsapiens.UCSC.hg19.knownGene}.
+
+
+For each method and dataset the transcript coordinates have been obtained, saved to binary files \texttt{transcriptCoords-\emph{Method-Dataset}.Rda} and written to .csv files \texttt{transcriptCoords-\emph{Method-Dataset}.csv} in the folder \texttt{results}, where \emph{Method} may be \texttt{Naive, CMI, Heuristic} and \texttt{Dataset} may be {DA, GEO, TCGA}.
+
+<<getTranscriptLocations, echo=FALSE>>=
+recalc<- TRUE
+if (recalc) {
+  transcriptCoordsNaiveDA <- getGenesLocations(unique(selectedGenesNaiveDA),
+                              csvFileName="results/coordsselectedGenesNaiveDA.csv")
+  transcriptCoordsCmiDA <- getGenesLocations(unique(selectedGenesCmiDA),
+                              csvFileName="results/coordsselectedGenesCmiDA.csv")
+  transcriptCoordsHeuristicDA <- getGenesLocations(unique(selectedGenesHeuristicDA),
+                              csvFileName="results/coordsselectedGenesHeuristicDA.csv")
+  transcriptCoordsNaiveGEO <- getGenesLocations(unique(selectedGenesNaiveGEO),
+                              csvFileName="results/coordsselectedGenesNaiveGEO.csv")
+  transcriptCoordsCmiGEO <- getGenesLocations(unique(selectedGenesCmiGEO),
+                              csvFileName="results/coordsselectedGenesCmiGEO.csv")
+  transcriptCoordsHeuristicGEO <- getGenesLocations(unique(selectedGenesHeuristicGEO),
+                              csvFileName="results/coordsselectedGenesHeuristicGEO.csv")
+  transcriptCoordsNaiveTCGA <- getGenesLocations(unique(selectedGenesNaiveTCGA),
+                              csvFileName="results/coordsselectedGenesNaiveTCGA.csv")
+  transcriptCoordsCmiTCGA <- getGenesLocations(unique(selectedGenesCmiTCGA),
+                              csvFileName="results/coordsselectedGenesCmiTCGA.csv")
+  transcriptCoordsHeuristicTCGA <- getGenesLocations(unique(selectedGenesHeuristicTCGA),
+                              csvFileName="results/coordsselectedGenesHeuristicTCGA.csv")
+  transcriptCoordsList <- 
+     list(tcNaiveDa = transcriptCoordsNaiveDA, tcCmiDA=transcriptCoordsCmiDA, 
+          tcHeuristicDA=transcriptCoordsHeuristicDA,
+          tcNaiveGEO = transcriptCoordsNaiveGEO, tcCmiGEO= transcriptCoordsCmiGEO, 
+          tcHeuristicGEO=transcriptCoordsHeuristicGEO,tcNaiveTCGA = transcriptCoordsNaiveTCGA, 
+          tcCmiTCGA= transcriptCoordsCmiTCGA, tcHeuristicTCGA=transcriptCoordsHeuristicTCGA)
+  save(transcriptCoordsList, file="results/transcriptCoordsSelectedGenes.Rda")
+}else{
+  load(file="results/transcriptCoordsSelectedGenes.Rda")
+}
+@
+
+For example the table of annotations corresponding to the \texttt{selectedNaiveDA} gene list has the following aspect:
+
+<<getLocationsExampleNaiveDA, echo=FALSE>>=
+head(transcriptCoordsList[["tcNaiveDa"]])
+@ 
+
+
+\subsection{Visualization of selected genes in the chromosomes}
+
+An interesting question when selecting genes putatively regulated by Methylation is if the genes are located at random or if they are clustered or grouped according to some criterion.
+
+Two distinct classes of objects can be reasonably related with methylated genes: \texttt{CpG Islands} and \emph{DNAse I Hypersensitive Sites (DHS)}. 
+\begin{enumerate}
+\item CpG islands are said to mark important regions in the genome because over 65\% of gene promoter regions can be found within CpG islands. A dataset with the model CpG island mapped onto the hg19 genome can be obtained from the USCS (\url{http://hgdownload.cse.ucsc.edu/goldenpath/hg19/database/cpgIslandExt.txt.gz})
+\item DNAse I hypersensitive sites are regions of chromatin that are sensitive to cleavage by the DNase I enzyme. Since the discovery of DHSs 30 years ago, they have been used as markers of regulatory DNA regions. In these specific regions of the genome, chromatin has lost its condensed structure, exposing the DNA and making it accessible. This raises the availability of DNA to degradation by enzymes, such as DNase I. These accessible chromatin zones are functionally related to transcriptional activity, since this remodeled state is necessary for the binding of proteins such as transcription factors. See \url{https://en.wikipedia.org/wiki/DNase_I_hypersensitive_site}. DHs can be downloaded from: \url{http://hgdownload.cse.ucsc.edu/goldenpath/hg19/encodeDCC/wgEncodeRegDnaseClustered/}.
+\end{enumerate}
+
+In order to facilitate the study of the relation between these objects and the genes regulated by methylation CpG islands and DH sites  will be plotted along the genome jointly with the selected genes.
+
+The resulting plots will be printed to pdf files  \texttt{Genes2Chromosomes-\emph{Method-Dataset}.pdf} in the folder \texttt{results}, where \emph{Method} may be \texttt{Naive, CMI, Heuristic} and \texttt{Dataset} may be {DA, GEO, TCGA}
+
+\subsubsection{Preparing data sources information}
+
+As a first step to plotting the coordinates of the \emph{necessary} CpG islands and DH sites are obtained. By ``necessary'' we mean only those that correspond to positions located between the first transcript and the last transcripts associated with selected genes. Information is read from public files and stored in objects of type \texttt{GRanges}, a Bioconductor class to efficiently store information about sequences.
+
+<<minMaxCoords, echo=FALSE>>=
+start <- min(unlist(lapply(transcriptCoordsList, function(tc){as.numeric(min(tc$TXSTART))})))
+end <- max(unlist(lapply(transcriptCoordsList, function(tc){as.numeric(max(tc$TXEND))})))
+
+# add 25% extra space to plot
+minbase <- start - (0.25*(end-start))
+maxbase <- end + (0.25*(end-start))
+
+islandHMM = read.csv(paste("dades", "model-based-cpg-islands-hg19.txt",sep="/"),
+                     sep="\t", stringsAsFactors=FALSE, header=TRUE)
+islandData <- GRanges(seqnames=Rle(islandHMM$chr), 
+                      ranges=IRanges(start=islandHMM$start, end=islandHMM$end),
+                      strand=Rle(strand(rep("*",nrow(islandHMM)))))
+head(islandData)
+
+# DNAseI hypersensitive sites
+dnase <- read.csv(paste("dades","wgEncodeRegDnaseClusteredV3.bed",sep="/"),
+                  sep="\t",stringsAsFactors=FALSE,header=FALSE)
+dnaseData <- GRanges(seqnames=dnase[,1],
+                     ranges=IRanges(start=dnase[,2], end=dnase[,3]),
+                     strand=Rle(rep("*",nrow(dnase))),
+                     data=dnase[,5])
+#dnaseData <- dnaseData[seqnames(dnaseData) == chrom &(start(dnaseData) >= minbase &  end(dnaseData) <= maxbase)] 
+head(dnaseData)
+@
+
+Next for each set of transcripts coordinates 
+
+<<DrawGenes2Chromosomes>>=
+redraw <- TRUE
+if (redraw){
+  for (i in 1:length(transcriptCoordsList)){
+    plotGenesInChroms (transcriptCoordsList[[i]], 
+                       paste("results/genePositions", names(transcriptCoordsList)[i],".pdf", sep=""),
+                       minbase=minbase, maxbase=maxbase, islandData=islandData, dnaseData=dnaseData)
+  }
+}
+@
+
+Figure \ref{chromosome1} shows the genes selected using the Naive method on the DA dataset in the first chromosome only.
+
+<<plotChromosome1>>=
+# Select columns needed for plotting  
+anotacs4<-transcriptCoordsList[[1]][,c('TXCHROM', 'TXSTART', 'TXEND')]
+anotacs4<-anotacs4[complete.cases(anotacs4),]
+#change column names to read it into GenomicRanges
+colnames(anotacs4)<-c("chromosome","start","end")
+genRangList<-makeGRangesFromDataFrame(anotacs4) #if we keep geneid we add keep.extra.columns=TRUE inside function
+# load context information necessary for plotting
+data <- read.table(paste("dades","cytoBandIdeo.txt", sep="/"), header=F, sep="\t")
+colnames(data) <-c('chrom', 'chromStart', 'chromEnd', 'name', 'gieStain')
+ideoTrack <- IdeogramTrack(genome="mm10",chromosome = "chr2", bands=data)
+
+# Go to plotting
+axisT<-GenomeAxisTrack()
+genList1<-AnnotationTrack(anotacs4, name = "Genes", genome ="hg19", chromosome ="chr1",  
+                          stacking ="dense", col= "#5E2366", fill= "#5E2366" )
+ideoT1<-IdeogramTrack(genome="hg19", bands = data,chromosome = "chr1", showId=FALSE)
+islandData1 <- islandData[seqnames(islandData) == "chr1" &  (start(islandData) >= minbase & end(islandData) <= maxbase)]
+islandTrack1 <- AnnotationTrack(range=islandData1, genome="hg19", name="CpG Islands", 
+                               chromosome="chr1")
+# DNaseI hypersensitive site data track
+dnaseTrack1 <- DataTrack(range=dnaseData, genome="hg19", name="DNAseI", 
+                        type="gradient", chromosome="chr1")
+pdf(file="results/chromosome1NaiveDA.pdf", width= 8, height = 12)
+  plotTracks(list(ideoT1,axisT,genList1, dnaseTrack1, islandTrack1), 
+             sizes=c(1,2,2,1,20), main="chr1", cex.main=1,  littleTicks = TRUE, showTitle=TRUE)
+dev.off()
+@
+
+\begin{figure}
+\includegraphics{results/chromosome1NaiveDA.pdf}
+\caption{\label{chromosome1} Distribution of genes on Chromosome 1. The genes are plotted as vertical purple lines, blue lines are the DNAse I hypersensitive sites and grey lines represent an accumulation of CpG islands.}
+\end{figure}
+
+\subsection{Overlap between CpG islands and selected genes}
+
+Additionally to drawing genes and CpG regions together one can find out the overlap between gene regions and CpG islands.
+This can be done by calling ``CpG islands'' genomic windows whose GC content>50\% and observed-to-expected CG ratio>0.6.
+
+The overlap can be computed based on two methods: ``standadrd'' and ``within'' defined in the documentation of Bioconductor \texttt{GRanges} package.
+
+For example, for the first chromosome and the gene list obtained by the Naive method on DA dataset we have:
+
+<<featOverlaps>>=
+#Subset CpG islands and create a new GRanges object 
+islandHMM2 <- islandHMM[islandHMM$GCcontent>50 & islandHMM$obsExp>0.6,]
+
+islandDataSel <- GRanges(seqnames=Rle(islandHMM2$chr), 
+                      ranges=IRanges(start=islandHMM2$start, end=islandHMM2$end),
+                      strand=Rle(strand(rep("*",nrow(islandHMM2)))))
+## Overlapping two GRanges objects:
+table(!is.na(findOverlaps(islandDataSel, genRangList, select="arbitrary")))
+countFeatOverlaps <- countOverlaps(islandDataSel, genRangList)
+findFeatOverlaps <- findOverlaps(islandDataSel, genRangList)
+subsetFeatOverlaps <- subsetByOverlaps(islandDataSel, genRangList)
+findFeatOverlapsWITHIN <- findOverlaps(genRangList, islandDataSel, type="within")
+@
+
+The overlaps between the model CpG islands identified on the human genome and the genes identified from our query dataset (Naive-DA) were selected by 2 different methods with the following results:
+For a non-defined overlap, there were \Sexpr{length(findFeatOverlaps)} overlaps between the model CpG islands and the genes selected from the DA data; and for a within feature overlap, there were \Sexpr{length(findFeatOverlapsWITHIN)} overlaps.   
+
+\clearpage
+\begin{thebibliography}{9}
+
+%\addcontentsline{toc}{chapter}{\numberline{}References}
+
+\bibitem{bazzocco:2014} Sarah Bazzocco, Hafid Alazzouzi, M. Carme Ruiz de Villa, Alex Sanchez-Pla, John M. Mariadason, Diego Arango (2013) \emph{Genome-Wide Analysis of DNA Methylation in Colorectal Cancer}. Submitted.
+
+\bibitem{Liu:2012} Yihua Liu and Peng Qiu. (2012) \emph{Integrative analysis of methylation and gene expression data in TCGA} IEEE International Workshop on Genomic Signal Processing and Statistics (GENSIPS)
+
+\bibitem{r-project} R Development Core Team (2005). R: A language and environment for statistical computing,  reference index version 2.14.0. R Foundation for Statistical Computing, Vienna, Austria. ISBN 3-900051-07-0, \\
+  \verb|http://www.R-project.org|
+
+\bibitem{racine:2012} Jeffrey Racine. (2012) A primer on regression splines.\newline
+\verb|http://cran.r-project.org/web/packages/crs/vignettes/spline_primer.pdf|
+
+\end{thebibliography}
+
+\end{document}

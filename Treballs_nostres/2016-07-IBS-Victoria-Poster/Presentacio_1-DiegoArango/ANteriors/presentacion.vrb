@@ -1,0 +1,16 @@
+\frametitle {Objectives}
+\label{sec-1.10}
+\begin{itemize}
+\item Study how gene expression is regulated by methylation in a set of colon cancer cell lines.\\
+\label{sec-1.10.1}
+\item Set up a method to detect the level of methylation at which a gene can be considered regulated by methylation (to be "on").\\
+\label{sec-1.10.2}
+\item Compare this method with other existing that have been developed to\\
+\label{sec-1.10.3}
+\begin{itemize}
+\item detect methylation thresholds\\
+\label{sec-1.10.3.1}
+\item detect patterns in scatterplots\\
+\label{sec-1.10.3.2}
+\end{itemize} % ends low level
+\end{itemize} % ends low level

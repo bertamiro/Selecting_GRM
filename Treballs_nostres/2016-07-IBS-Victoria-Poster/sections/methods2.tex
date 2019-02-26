@@ -1,0 +1,36 @@
+\begin{itemize}
+\item For an L-shape gene it is verified that:
+\begin{itemize}
+\item The ratio $r=\frac{\min\{\mathit{cMI}(t)\}}{\mathit{cMI}(0)}$ is small, 
+\item $t^{\ast} = \mathrm{argmin}\{ \mathit{cMI}(t) \}$ is the \textbf{optimal threshold} for 
+dichotomizing the methylation data of this gene.
+\end{itemize}
+\end{itemize}
+
+%To estimate the MI terms we use a kernel-based estimator by applying a %Gaussian kernel to each data point:
+%\[
+%I(X,Y) = \frac 1M \sum_{i=1}^M \log\frac{M\sum_{j=1}^M e^{-\frac{1}{2h^2}%((x_i-x_j)^2+(y_i-y_j)^2)}}{%
+      %                                \sum_{j=1}^M e^{-\frac{1}{2h^2}(x_i-%x_j)^2} \sum_{j=1}^M e^{-\frac{1}{2h^2}(y_i-y_j)^2}}
+%\]
+%where $h$ is a tuning parameter for the kernel width empirically set to 
+% $h=0.3$.
+  
+
+\subsection{Based on Spline regression}
+\begin{itemize}
+\item As an alternative to the previous method we suggest that spline regression \cite{racine} can be used for scatter plot clustering.
+\item In spline regression a curve $y=s(x)$ is represented as $\mathbf{y}_i=\mathbf{B}_i\mathbf{c}$ where 
+\begin{itemize}
+\item $\mathbf{B}_i =\left[ B_{1p}\mathbf{x}_i,B_{2p}\mathbf{x}_i,\dots,B_{Lp}\mathbf{x}_i \right]$ the spline basis matrix and 
+\item $\mathbf{c}$ is the vector of spline coefficients.
+\end{itemize}
+
+\item This suggests the following method (and algorithm) for detecting L--shaped genes based on \textbf{Clustering Spline Coefficients}:
+\begin {enumerate}
+\item Select genes with significant correlation.
+\item For each selected gene fit a cubic splines regression model.
+\item Obtain a distance matrix between all genes using the $1-\rho$ distance computed on spline coefficients.
+\item Perform a hierarchical clustering and 
+\item Select genes in the \textit{L-shaped cluster(s)}.
+\end{enumerate}
+\end{itemize}

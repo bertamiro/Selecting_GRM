@@ -1,0 +1,15 @@
+\frametitle{Objectives}
+The main objectives of this work are:
+\begin{enumerate}
+%\item Study how gene expression is regulated by methylation in a set of colon cancer cell lines.\\
+%\item Set up a method to detect the level of methylation at which a gene can be considered regulated by methylation (to be "on").\\
+%\item Compare this method with other existing that have been developed to\\
+%\begin{itemize}
+%\item detect methylation thresholds
+%\item detect patterns in scatterplots
+%\end{itemize}
+\item To compare available methods  for scatterplot clustering, \\ or to derive new ones if needed.
+\item To apply the selected methods on a specific CRC dataset and validate the findings based on their biological relevance.
+\item As a secondary objective deriving a binarization point enabling to call a gene ``methylated'' or ``unmethylated'' would also be desired.
+\end{enumerate}
+

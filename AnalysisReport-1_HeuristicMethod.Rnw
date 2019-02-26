@@ -98,6 +98,10 @@ resultsDir <- file.path(workingDir, "results")
 # install.packages("stringi")
 # install.packages("evaluate")
 if (!(require(VennDiagram))) install.packages("VennDiagram")
+if (!(require(org.Hs.eg.db))) {
+  source("http://bioconductor.org/biocLite.R")
+  biocLite("org.Hs.eg.db")
+}
 source(file.path(codeDir, "gridFunctions.R"))
 if(!(require(printr))) {
   install.packages(
@@ -693,6 +697,58 @@ grid.draw(myVenn4)
 @
 
 Or it can be applied to a pre-filtered subset, such as genes showing a significantly negative correlation.
+
+\section{Pathway Analysis of Gene lists}
+
+\subsection{Introduction}
+
+A pathway analysis can be performed and their results compared to find out 
+\begin{enumerate}
+\item If genes selected can be, in any biological way, related with methylation
+\item If the lists are related at leas from the biological significance point of view. This will be performed by
+\begin{enumerate}
+\item Comparing the results of the enrichment analyses performed
+\item Making an equivalence analysis based on goProfiles
+\end{enumerate}
+\end{enumerate}
+
+\subsection{Methods for pathway analysis}
+
+First gene symbols must be translated into Entrez Identifiers.
+
+<<renameGeneLists>>=
+gsymbolsDA=rownames(DAExprData)
+gsymbolsGEO=rownames(geoExprData)
+gsymbolsTCGA=rownames(TCGAExprData)
+selSymbolsDA <- geneListLDAExpr
+selSymbolsGEO <- geneListLGEOExpr
+selSymbolsTCGA <- geneListLTCGA
+@
+
+<<translate2Entrez>>=
+require(org.Hs.eg.db)
+# keytypes(org.Hs.eg.db)
+# columns(org.Hs.eg.db)
+allEntrezsDA <- unique(select(org.Hs.eg.db, keys=gsymbolsDA, columns = c("ENTREZID"), keytype="SYMBOL")[,"ENTREZID"]); length(allEntrezsDA)
+allEntrezsGEO <- unique(select(org.Hs.eg.db, keys=gsymbolsGEO, columns = c("ENTREZID"), keytype="SYMBOL")[,"ENTREZID"]); length(allEntrezsGEO)
+allEntrezsTCGA <-unique(select(org.Hs.eg.db, keys=gsymbolsTCGA, columns = c("ENTREZID"), keytype="SYMBOL")[,"ENTREZID"]); length(allEntrezsTCGA)
+selEntrezsDA <- unique(select(org.Hs.eg.db, keys=selSymbolsDA, columns = c("ENTREZID"), keytype="SYMBOL")[,"ENTREZID"]); length(selEntrezsDA)
+selEntrezsGEO <- unique(select(org.Hs.eg.db, keys=selSymbolsGEO, columns = c("ENTREZID"), keytype="SYMBOL")[,"ENTREZID"]);length(selEntrezsGEO)
+selEntrezsTCGA <-unique(select(org.Hs.eg.db, keys=selSymbolsTCGA, columns = c("ENTREZID"), keytype="SYMBOL")[,"ENTREZID"]);length(selEntrezsTCGA)
+@
+
+Pathway Analysis has been performed with DAVID an online tool at NVBI which works by uploading the Universe and selected lists.
+
+<<writeGeneLists>>=
+write.csv (allEntrezsDA, file=file.path(resultsDir,"allEntrezsDA.csv"), quote=FALSE, row.names=FALSE)
+write.csv (allEntrezsGEO, file=file.path(resultsDir,"allEntrezsGEO.csv"), quote=FALSE, row.names=FALSE)
+write.csv (allEntrezsTCGA, file=file.path(resultsDir,"allEntrezsTCGA.csv"), quote=FALSE, row.names=FALSE)
+write.csv (selEntrezsDA, file=file.path(resultsDir,"selEntrezsDA.csv"), quote=FALSE, row.names=FALSE)
+write.csv (selEntrezsGEO, file=file.path(resultsDir,"selEntrezsGEO.csv"), quote=FALSE, row.names=FALSE)
+write.csv (selEntrezsTCGA, file=file.path(resultsDir,"selEntrezsTCGA.csv"), quote=FALSE, row.names=FALSE)
+@
+
+
 
 
 \clearpage

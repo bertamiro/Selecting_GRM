@@ -13,6 +13,10 @@ source("gridFunctions.R")
 workingDir <- getwd()
 dataDir <- file.path(workingDir, "data")
 
+# Set memory size limit to 30 Mb. Intended to allow uploading big files
+
+options(shiny.maxRequestSize=30*1024^2)
+
 #server
 shinyServer(function(input, output, clientData, session) {
   

@@ -1,0 +1,355 @@
+\documentclass[handout]{beamer}
+%\documentclass[xcolor=pst]{beamer}
+%\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+
+\usepackage{amssymb,amsmath}
+\usepackage{graphicx} 
+%\usepackage[pdf]{pstricks}
+\usepackage{colortbl}
+\definecolor{fucsia}{rgb}{1,0,1}
+%\usepackage[Q=yes]{examplep}
+
+\newcounter{savedenum}
+\newcommand*{\saveenum}{\setcounter{savedenum}{\theenumi}}
+\newcommand*{\resume}{\setcounter{enumi}{\thesavedenum}}
+
+%\usepackage{default}
+\usetheme{Warsaw}
+
+%\setbeamertemplate{caption}[numbered]
+
+
+\title[Scatterplot clustering]{Scatterplot clustering for the integrative analysis of expression and methylation data}
+%\author[shortname]{author1 \inst{1} \and author2 \inst{2}}
+%\institute[shortinst]{\inst{1} affiliation for author1 \and 
+%                      \inst{2} affiliation for author2}
+\author[Ruiz de Villa]{M. Carme Ruiz de Villa, Francesc Carmona \\ Diego Arango del Corro, Sarah Bazzoco 
+\\ Alex Sánchez}
+\date[]{Nov 10-12, 2014}
+
+\begin{document}
+\begin{frame}
+\begin{scriptsize}
+\begin{center}
+   Statistical Methods for Omics Data Integration and Analysis 2014
+\end{center}
+\end{scriptsize}
+
+\titlepage
+
+\begin{columns}
+   \column{0.7\textwidth}
+   \scriptsize
+   Departamento de Estadística \\ \textbf{Facultad de Biología}
+    
+   \hfill\column{0.3\textwidth}
+   \includegraphics[height=1.25cm]{images/ub_marca_1l_pos_2t.pdf}
+   %\includegraphics[height=1cm]{images/ub-logo.jpg} 
+\end{columns}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Table of Contents}
+\tableofcontents
+\end{frame}
+
+\section{Introduction}
+
+\subsection{Preliminaries}
+
+\begin{frame}
+\frametitle{Epigenetics and epigenomics}
+\begin{columns}
+\begin{column}{.5\linewidth}
+\begin{itemize}
+\item Epigenetics, \emph{the study of environmental factors on gene expression in DNA}, shows a renewed impetus:
+\begin{itemize}
+\item NGS allows in-deep analysis of regulatory mechanisms such as \emph{methylation} or \emph{histone modifications}.
+\item There is increasing evidence that many differentiation processes are triggered and maintained through epigenetic mechanisms.
+\end{itemize} 
+\end{itemize} 
+\end{column}
+ \begin{column}{.5\linewidth}
+\includegraphics[width=0.9\textwidth]{./images/epigeneticsMechanisms.jpg}
+ \end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}[fragile]\frametitle{Methylation}
+\begin{itemize}
+\item Methylation of CpG dinucleotides in the promoter of genes involved in the oncogenic process has been shown to be a key process contributing to tumor initiation and/or progression.
+\item Essentially methylation acts by inhibiting gene expression that is, the more methylated is a gene the more repressed is its expression
+\begin{center}
+\includegraphics[width=0.7\textwidth]{./images/methylationAction1.png}
+\end{center}
+%\item Methylation is seen however as a dual phenomenon\\
+%\label{sec-1.8.3}
+%\begin{itemize}
+%\item A methylated gene is "off"\\
+%\label{sec-1.8.3.1}
+%\item An unmethlated gene is "on"\\
+%\label{sec-1.8.3.2}
+%\end{itemize} % ends low level
+%\item So in practice an important practical problem is to determine at which methylation level a gene is seen as "methylated" (that is turned off).\\
+%\label{sec-1.8.4}
+\end{itemize} 
+\end{frame}
+
+\begin{frame}[fragile]\frametitle{Methylation and gene expression}
+\begin{itemize}
+\item Although the relation between methylation and gene expression is probably continuous ("\emph{the more...the less...}"), 
+\begin{center}
+\includegraphics[width=0.7\textwidth]{./images/DNA-Methylation-and-Gene-Expression-Relationship.jpg}
+\end{center}
+\item methylation is, in practice, seen as a dual phenomenon
+\begin{itemize}
+\item A methylated gene is ``off''
+\item An unmethlated gene is ``on''
+\end{itemize} 
+\item Practical problem: \textbf{\emph{at which methylation level a gene is seen as ``methylated'' (that is, it is ``turned off'')?}}
+\end{itemize} 
+
+\end{frame}
+
+\begin{frame}{Gene-specific methylation on-off threshold}
+\begin{itemize}
+\item Since measurements for methylation and expression are both
+continuous, a biaxial plot of these two signals will exhibit an
+L-shape pattern. 
+\item If we truly
+believe that methylation is binary, there are two implications:
+\begin{enumerate}
+\item the reflection point of the L-shape is an appropriate choice
+to binarize methylation data, and
+\item conditioning on the
+binarized on-off methylation status, the continuous valued
+methylation data and expression data should be independent,
+\end{enumerate}
+which motivates Liu(2012) to quantify the L-shape pattern using
+conditional mutual information (MI). 
+\end{itemize}
+\end{frame}
+
+\subsection{Motivation}
+\begin{frame}{A colon cancer study}
+  \begin{itemize}
+  \item This study originates in a work searching for colon cancer biomarkers.
+  \item 30 cell lines characterized by increasing sensitivity to a drug were analyzed using several high-throughput methods:\emph{ transcriptomics, methylation, miRNAs, SNPs}, and \emph{proteomics}.
+\item In this work we consider the problem of stablishing which genes were regulated by methylation.
+\item For each gene/methylation locus one has 30 points and a scatterplot showing the relation so we need methods to find patterns of scatterplots
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Scatterplot patterns}
+\begin{center}
+\includegraphics[width=0.7\textwidth]{./images/Cluster1_Page_1.pdf}
+\end{center}
+\end{frame}
+
+
+
+\subsection{Objectives}
+
+\begin{frame}[fragile]\frametitle{Objectives}
+The main objectives of this work are:
+\begin{itemize}
+%\item Study how gene expression is regulated by methylation in a set of colon cancer cell lines.\\
+%\item Set up a method to detect the level of methylation at which a gene can be considered regulated by methylation (to be "on").\\
+%\item Compare this method with other existing that have been developed to\\
+%\begin{itemize}
+%\item detect methylation thresholds
+%\item detect patterns in scatterplots
+%\end{itemize} 
+\item To select an appropriate method for scatterplot clustering.
+\item To test the methods selected on a colon cancer dataset formed by a panel of 30 cell lines derived from colorectal tumors and validate the findings based on their biological relevance.
+\end{itemize} 
+\end{frame}
+
+\begin{frame}{Methods for selecting L-shape genes}
+\begin{itemize}
+\item Conditional Mutual Information.
+\item Clustering based on Splines Regression.
+\item Others.
+\end{itemize}
+\end{frame}
+
+\section{Methods for pattern selection}
+
+\subsection{Based on Conditional Mutual Information}
+
+\begin{frame}{Conditional Mutual Information}
+\begin{block}{The key}
+To determine whether methylation and expression of a gene exhibit an L-shape,
+we compute the conditional Mutual Information (MI) for different choices of threshold
+to binarize the methylation data.
+\end{block}
+If we consider the continuous valued methylation and expression data as two random variables
+$X$ and $Y$, and denote a nominal threshold as $t$, the conditional MI can be written as a
+weighted sum of MIs on the two sides of the threshold.
+\[
+\mathit{cMI}(t)=I(X,Y|X>t)P(X>t) + I(X,Y|X\le t)P(X\le t)
+\]
+\end{frame}
+
+\begin{frame}{Optimal threshold for binarizing methylation data}
+When $t$ is $0$ or $1$, $\mathit{cMI}$ equals to the mutual information derived 
+from all data points.
+
+For an L-shape gene, as $t$ moves from 0 to 1, $\mathit{cMI}(t)$ first decreases and then
+increases, and its value approaches zero when $t$ coincides with the reflection point. 
+Therefore,
+\begin{block}{Optimal threshold}
+The ratio $r=\frac{\min\{\mathit{cMI}(t)\}}{\mathit{cMI}(0)}$ for an L-shape gene is small, 
+and $t^{\ast} = \mathrm{argmin}\{ \mathit{cMI}(t) \}$ is the optimal threshold for 
+dichotomizing the methylation data of this gene.
+\end{block}
+
+\end{frame}
+
+\begin{frame}{Joint distribution estimator}
+To estimate the MI terms we use a kernel-based estimator, which constructs a joint
+probability distribution by applying a Gaussian kernel to each data point, and estimates
+the MI based on the joint distribution. The estimator is as follows:
+\[
+I(X,Y) = \frac 1M \sum_{i=1}^M \log\frac{M\sum_{j=1}^M e^{-\frac{1}{2h^2}((x_i-x_j)^2+(y_i-y_j)^2)}}{%
+                                      \sum_{j=1}^M e^{-\frac{1}{2h^2}(x_i-x_j)^2} \sum_{j=1}^M e^{-\frac{1}{2h^2}(y_i-y_j)^2}}
+\]
+where $h$ is a tuning parameter for the kernel width and empirically set $h=0.3$.
+% i and j are indices for samples.
+% In our analysis, we normalize the expression data to zero mean.
+\end{frame}
+
+\subsection{Based on Spline regression}
+
+\begin{frame}{Spline Regression}
+
+\end{frame}
+
+
+\begin{frame}{Clustering using Spline regression }
+We implemented regression based on  $B$-splines because they are particularly efficient due to the block-diagonal basis matrices that result.
+
+Let 
+\begin {itemize}
+\item $\varsigma=\lbrace t_1 < \cdots < t_N \rbrace$ non decreasing  knot sequence 
+\item $\left[ t_m,t_{m+1} \right)$ half open interval
+\item $B_{mp}$ $p$-th order polynomial (degree $p-1$) with finite support over the interval and 0 everywhere else so that  $\sum_{m=1}^{N-p}B_{mp}(x)=1$
+\item then  $s(x)=\sum_{m=1}^{N-p}B_{mp}(x)c_m$ 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Clustering using Spline regression (2)}
+To represent the curve we set:
+\[
+y_{ij}=s(x_{ij})
+\]
+So
+\[ 
+\mathbf{y}_i=\mathbf{B}_i\mathbf{c}
+\]
+with
+\begin {itemize}
+\item $\mathbf{B}_i=\left[ B_{1p}\mathbf{x}_i,B_{2p}\mathbf{x}_i,\dots,B_{Lp}\mathbf{x}_i \right]$ the spline basis matrix
+\item $\mathbf{c}$ the vector of spline coefficients.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Clustering using Spline regression (3)}
+Algorithm
+\begin {enumerate}
+\item Selection of the genes with a negative significant correlation
+\item Fit cubic regression splines
+\item Data to cluster: splines coefficients
+\item Calculation of a distance matrix between genes as $1-\rho$
+\item Hierarchical clustering 
+\end{enumerate}
+\end{frame}
+
+\section{Results}
+
+\begin{frame}{Results (1) Conditional Mutual Information}
+\begin {itemize}
+\item No previous selection of the genes was needed
+%\begin{block}{Three criteria}
+\item We filtered for L-shapes using a combination of three criteria:
+\begin{itemize}
+\item the ratio $r<0.25$
+\item unconditioned MI $\mathit{cMI}(0)>0.1$
+\item the median expression on the left side of the optimal threshold $t^{\ast}$ is higher
+than the median expression on the right side.
+\end{itemize}
+%\end{block}
+\item The parameters are chosen according to a random permutation test (see Liu(2012)).
+\item According to the above criteria, a total of 641 genes are selected to be L-shape genes.
+\end{itemize}
+\end{frame}
+
+
+\begin {frame}{Results (2) Splines--based regression}
+\begin {itemize}
+\item After the previous selection of genes we worked with 191 genes
+\item We decided to choose 5 clusters
+\item The 2 first clusters included the genes with an L-shape
+\end{itemize}
+\begin{center}
+\includegraphics[height=5cm]{./images/grafic_two_patterns.pdf}
+\end{center}
+\end{frame}
+
+\begin{frame}{Algorithm for combining both methods}
+
+\end{frame}
+
+\begin{frame}{Results (3)}
+The results of both methods that can be summarized in the following table:
+\begin{columns}
+\begin{column}{.5\linewidth}
+\begin{center}
+\begin{tabular}{|c|c|c|}
+\hline
+Initial selection & 191 & 641 \\
+\hline
+\hline
+Cluster & Splines & cMI \\
+\hline
+1 & 140 & 102 \\
+2 & 22 & 16 \\
+\hline
+Total & 162 & 118 \\
+\hline 
+\end{tabular}
+\end{center}
+\end{column}
+\begin{column}{.5\linewidth}
+\begin{center}
+\includegraphics[height=5cm]{./images/grafic_two_genes.pdf}
+\end{center}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Biological significance assessment}
+
+\end{frame}
+
+\begin{frame}{Conclusions}
+  \begin{itemize}
+  \item We have found similar results between both methods.
+  \item Biological interpretation is still being done by biological
+    researchers although results are consistent with the hypothesis
+    (we have found genes regulated by methylation).
+  \item Sample size is a limiting factor: cMI works better with hundreds of samples but one may have a very small number (real cases: 30, 12)
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Acknowledgments}
+  \begin{itemize}
+  \item 
+  \end{itemize}
+\end{frame}
+
+
+
+\end{document}

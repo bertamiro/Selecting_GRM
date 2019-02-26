@@ -1,0 +1,43 @@
+\documentclass[a0,portrait]{a0poster}
+\input{sections/style}
+
+\begin{document}
+
+\vspace{1cm}
+\input{sec0_header}
+\vspace{1cm}
+
+
+% ----------------------------------------------------------------
+
+
+\begin{multicols}{2}
+
+\fcolorbox{black}{white}{\parbox{1.0\columnwidth}
+{\input{sec1_intro}}}
+
+\vspace{1cm} \fcolorbox{black}{backgrey}{\parbox{1.0\columnwidth}
+{\input{sec2_methods1}}}
+
+\vspace{1cm} \fcolorbox{black}{backblue}{\parbox{1.0\columnwidth}
+{\input{sec3_methods2}\vspace{0.8cm}}}
+
+\vspace{1cm}
+\fcolorbox{black}{backyellow}{\parbox{1.0\columnwidth}
+{\input{sec4_results}}}
+
+\vspace{1cm} \fcolorbox{black}{white}{\parbox{1.0\columnwidth}
+{\input{sec5_conc}}}
+
+\end{multicols}
+
+
+% ----------------------------------------------------------------
+
+
+\vspace{-1cm} \small\input{sec6_biblio}\normalsize
+
+\vspace{0.5cm}
+\input{sec0b_footer}
+
+\end{document}

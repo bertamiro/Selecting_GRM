@@ -1,0 +1,16 @@
+\subsection{Heuristic approach}
+A heuristic method has been developed basing on imitating the visual selection of L-shapes (see figure)
+\begin{itemize}
+\item Overimpose a $3\times 3$ grid on the scatterplot.
+\item Score points on each subgrid in such a way that
+\begin{itemize}
+	\item Points in permitted regions increase score
+	\item Points in non-desired regions decrease score
+	\item Points in non-allowed regions set score to $\-infty$.
+\end{itemize}
+\item Use cross-validation to tune scoring parameters.
+\end{itemize}
+
+\subsection{The Naive method}
+
+Traditionally selection has been based on searching for genes with negative correlation betweem expression and correlation. This ``Naïve approach" is used to compare with other approaches.

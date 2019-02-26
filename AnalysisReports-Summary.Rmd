@@ -168,8 +168,76 @@ Los archivos de resultados se presentan en orden alfabético pero si por ejemplo
 head(DAvalues[order(DAvalues$r..Sp.,decreasing = FALSE),])
 head(GEOvalues[order(GEOvalues$r..Sp.,decreasing = FALSE),])
 head(TCGAvalues[order(TCGAvalues$r..Sp.,decreasing = FALSE),])
+```
+
+### Genes considerados en forma de L
+
+Las tablas de resultados tan sólo generan un valor binario para el método heurístico, pero fijando valores de corte para los métodos naïve y cMI es imediato obtener lista de valores similares para éstos métodos.
+Por ejemplo definiremos "Regulado por metilación" 
+
+- **Para el método Naïve**: El coeficiente de correlación es menor que -0.5 (y el p-valor ajustado < 0.25)
+- **Para el método cMI**: EL valor de cMI (0) mínimo es superior a 0.1 y el Ratio > 0.25 (`meth_regulated=TRUE`).
+- **Para el método heurístico**: Si no se incumplen los porcentajes fijados en ninguna celda (`logicSc=TRUE`)
+
+```{r}
+commonGenes <- intersect(rownames(TCGAvalues), intersect(rownames(DAvalues), rownames(GEOvalues)))
+length(commonGenes)
+DA_naive   <- (DAvalues[,"r..Sp."] < -0.5) & DAvalues[,"adj.Spear.Pval"] < 0.25
+GEO_naive  <- GEOvalues[,"r..Sp."] < -0.5 & GEOvalues[,"adj.Spear.Pval"] < 0.25
+TCGA_naive <- TCGAvalues[,"r..Sp."] < -0.5 & TCGAvalues[,"adj.Spear.Pval"]< 0.25
+DA_heuristic <-DAvalues[,"logicSc"] 
+GEO_heuristic <-GEOvalues[,"logicSc"] 
+TCGA_heuristic <-TCGAvalues[,"logicSc"] 
+DA_cmi <-DAvalues[,"meth_regulated"] 
+GEO_cmi <-GEOvalues[,"meth_regulated"] 
+TCGA_cmi <-TCGAvalues[,"meth_regulated"] 
+
+resultsAll <- cbind(DA_naive = DA_naive, 
+                    DA_CMI=DAvalues[commonGenes,"meth_regulated"], 
+                    DA_heuristic=DAvalues[commonGenes,"logicSc"],
+                    GEO_naive = GEO_naive, 
+                    GEO_CMI=GEOvalues[commonGenes,"meth_regulated"], 
+                    GEO_heuristic=GEOvalues[commonGenes,"logicSc"],
+                    TCGA_naive = TCGA_naive, 
+                    TCGA_CMI=TCGAvalues[commonGenes,"meth_regulated"], 
+                    TCGA_heuristic=TCGAvalues[commonGenes,"logicSc"])
+apply(resultsAll,2,sum)
+```
+
+Esto nos permite ver con facilidad los genes en común en cada set entre distintos métodos y los genes seleccionados por cada método entre datasets.
+
+```{r}
+require(VennDiagram)
+myVennNaive<- venn.diagram(x=list(naiveDA=resultsAll[,"DA_naive"], 
+                                naiveGEO=resultsAll[,"GEO_naive"], 
+                                cmiTCGA=resultsAll[,"TCGA_naive"]), 
+                                filename=NULL, lty = "blank",  
+                              fill=c("pink1", "skyblue", "mediumorchid"),
+                       main="Genes in common between the three -NAIVE selected- gene lists")
+grid.newpage()
+grid.draw(myVennNaive)
+
+myVennCMI<- venn.diagram(x=list(cmiDA=resultsAll[,"DA_CMI"], 
+                                cmiGEO=resultsAll[,"GEO_CMI"], 
+                                cmiTCGA=resultsAll[,"TCGA_CMI"]), 
+                                filename=NULL, lty = "blank",  
+                                fill=c("pink1", "skyblue", "mediumorchid"),
+                                main="Genes in common between the three -CMI selected- gene lists")
+grid.newpage()
+grid.draw(myVennCMI)
+
+myVennDA<- venn.diagram(x=list(naiveDA=resultsAll[,"DA_naive"], 
+                                cmiDA=resultsAll[,"DA_CMI"], 
+                                heuristicDA=resultsAll[,"DA_heuristic"]), 
+                                filename=NULL, lty = "blank",  
+                                fill=c("pink1", "skyblue", "mediumorchid"),
+                                main="Genes in common between the three methods in DA dataset")
+grid.newpage()
+grid.draw(myVennDA)
 
 ```
+
+
 
 ### El gen ZBTB18
 

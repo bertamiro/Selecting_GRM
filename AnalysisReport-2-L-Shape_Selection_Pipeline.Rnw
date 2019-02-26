@@ -62,7 +62,7 @@ concordance=FALSE, echo=TRUE, cache=FALSE, warning=FALSE, error=FALSE, message=F
 
 This document describes how to implement a pipeline for selecting L-shaped genes from two data matrices, an expression and a methylation matrix, matched by rows (genes) and columns(samples), using the algorithms implemented by the authors and described elsewhere.
 
-The idea is to "keep-it-simple" so that it the process can be followed by a non-technical reader. 
+The idea is to "keep-it-simple" so that the process can be followed by a non-technical reader. 
 
 The steps correpond roughly to what one user would do when exploring two expression-methylation datasets
 
@@ -87,7 +87,7 @@ The steps correpond roughly to what one user would do when exploring two express
   \item Plot genes in chromosome
   \item Add gene positions to results table
   \end{enumerate}
-  \item Do enrichment analysis of the selecte gene list
+%  \item Do enrichment analysis of the selecte gene list
 \end{enumerate}
 
 <<directoris, echo=FALSE, eval=TRUE>>=
@@ -198,7 +198,7 @@ A summary of each datasets follows below:
 
 <<readDataDA, eval=TRUE>>=
 require(printr)
-load("../DataSets/combined/matchedMarrRNAseqMethDataByPAIRS.Rda")
+load(file.path(dadesDir,"matchedMarrRNAseqMethDataByPAIRS.Rda"))
 DAExprData <- as.matrix(dataMarrCR2)
 DAMetilData <- as.matrix(dataMethCR2)
 rm(dataMarrCR0,dataMarrCR2, dataMethCR1, dataMethCR2, dataMethVarCR1, dataMethVarCR2, dataRNAseqCR0, dataRNAseqCR0CS, dataRNAseqCR1, dataRNAseqCR1CS) # clean files loaded with the desired files
@@ -599,15 +599,19 @@ myVenn3<- venn.diagram(x=list(DAMicroarrays=geneListLDAExpr,
                               fill=c("pink1", "skyblue"))
 grid.newpage()
 grid.draw(myVenn3)
+@
 
-myVenn4<- venn.diagram(x=list(DAMicroarrays=geneListLDAExpr, 
+<<commonHeuristic3>>=
+myVenn4H<- venn.diagram(x=list(DAMicroarrays=geneListLDAExpr, 
                               GEO=geneListLGEOExpr,
                               TCGA=geneListLTCGAExpr), 
                               filename=NULL, lty = "blank",  
-                              fill=c("pink1", "skyblue", "mediumorchid"))
+                              fill=c("pink1", "skyblue", "mediumorchid"),
+                           main="Genes in common between the three -heuristic selected- gene lists")
 grid.newpage()
-grid.draw(myVenn4)
+grid.draw(myVenn4H)
 @
+
 
 \section{Comparison between the selected lists}
 
@@ -788,6 +792,10 @@ head(transcriptCoordsList[["tcNaiveDa"]])
 
 \subsection{Visualization of selected genes in the chromosomes}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% HO HE DEIXAT A FALSE PQ HI INTERVENEN ARXIUS GRANS QUE NO TINC A GITHUB
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 An interesting question when selecting genes putatively regulated by Methylation is if the genes are located at random or if they are clustered or grouped according to some criterion.
 
 Two distinct classes of objects can be reasonably related with methylated genes: \texttt{CpG Islands} and \emph{DNAse I Hypersensitive Sites (DHS)}. 
@@ -804,7 +812,7 @@ The resulting plots will be printed to pdf files  \texttt{Genes2Chromosomes-\emp
 
 As a first step to plotting the coordinates of the \emph{necessary} CpG islands and DH sites are obtained. By ``necessary'' we mean only those that correspond to positions located between the first transcript and the last transcripts associated with selected genes. Information is read from public files and stored in objects of type \texttt{GRanges}, a Bioconductor class to efficiently store information about sequences.
 
-<<minMaxCoords, echo=FALSE>>=
+<<minMaxCoords, echo=FALSE, eval=FALSE>>=
 start <- min(unlist(lapply(transcriptCoordsList, function(tc){as.numeric(min(tc$TXSTART))})))
 end <- max(unlist(lapply(transcriptCoordsList, function(tc){as.numeric(max(tc$TXEND))})))
 
@@ -832,7 +840,7 @@ head(dnaseData)
 
 Next for each set of transcripts coordinates 
 
-<<DrawGenes2Chromosomes>>=
+<<DrawGenes2Chromosomes, eval=FALSE>>=
 redraw <- TRUE
 if (redraw){
   for (i in 1:length(transcriptCoordsList)){
@@ -845,7 +853,7 @@ if (redraw){
 
 Figure \ref{chromosome1} shows the genes selected using the Naive method on the DA dataset in the first chromosome only.
 
-<<plotChromosome1>>=
+<<plotChromosome1, eval=FALSE>>=
 # Select columns needed for plotting  
 anotacs4<-transcriptCoordsList[[1]][,c('TXCHROM', 'TXSTART', 'TXEND')]
 anotacs4<-anotacs4[complete.cases(anotacs4),]
@@ -875,7 +883,7 @@ dev.off()
 @
 
 \begin{figure}
-\includegraphics{results/chromosome1NaiveDA.pdf}
+%\includegraphics{results/chromosome1NaiveDA.pdf}
 \caption{\label{chromosome1} Distribution of genes on Chromosome 1. The genes are plotted as vertical purple lines, blue lines are the DNAse I hypersensitive sites and grey lines represent an accumulation of CpG islands.}
 \end{figure}
 
@@ -888,7 +896,7 @@ The overlap can be computed based on two methods: ``standadrd'' and ``within'' d
 
 For example, for the first chromosome and the gene list obtained by the Naive method on DA dataset we have:
 
-<<featOverlaps>>=
+<<featOverlaps, eval=FALSE>>=
 #Subset CpG islands and create a new GRanges object 
 islandHMM2 <- islandHMM[islandHMM$GCcontent>50 & islandHMM$obsExp>0.6,]
 
@@ -903,8 +911,8 @@ subsetFeatOverlaps <- subsetByOverlaps(islandDataSel, genRangList)
 findFeatOverlapsWITHIN <- findOverlaps(genRangList, islandDataSel, type="within")
 @
 
-The overlaps between the model CpG islands identified on the human genome and the genes identified from our query dataset (Naive-DA) were selected by 2 different methods with the following results:
-For a non-defined overlap, there were \Sexpr{length(findFeatOverlaps)} overlaps between the model CpG islands and the genes selected from the DA data; and for a within feature overlap, there were \Sexpr{length(findFeatOverlapsWITHIN)} overlaps.   
+%The overlaps between the model CpG islands identified on the human genome and the genes identified from our query dataset (Naive-DA) were selected by 2 different methods with the following results:
+%For a non-defined overlap, there were \Sexpr{length(findFeatOverlaps)} overlaps between the model CpG islands and the genes selected from the DA data; and for a within feature overlap, there were \Sexpr{length(findFeatOverlapsWITHIN)} overlaps.   
 
 \clearpage
 \begin{thebibliography}{9}

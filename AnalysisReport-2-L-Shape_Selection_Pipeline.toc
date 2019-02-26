@@ -1,0 +1,21 @@
+\contentsline {section}{\numberline {1}Introduction}{1}
+\contentsline {section}{\numberline {2}Datasets used for the study}{2}
+\contentsline {subsection}{\numberline {2.1}On the preprocessing and selection of the researcher's data}{2}
+\contentsline {subsection}{\numberline {2.2}Colon Cancer datasets}{2}
+\contentsline {subsection}{\numberline {2.3}TRUE and FALSE 'L-shaped' genes}{5}
+\contentsline {subsection}{\numberline {2.4}Additional data checks}{5}
+\contentsline {section}{\numberline {3}Selection of L-shaped genes}{6}
+\contentsline {subsection}{\numberline {3.1}Methods}{6}
+\contentsline {subsection}{\numberline {3.2}Selecting L-shaped genes with the Naive method}{6}
+\contentsline {subsubsection}{\numberline {3.2.1}Naive selection on TRUE and FALSE candidates}{9}
+\contentsline {subsection}{\numberline {3.3}Selecting L-shaped genes with the CMI method}{11}
+\contentsline {subsubsection}{\numberline {3.3.1}CMI selection on TRUE and FALSE candidates}{12}
+\contentsline {subsection}{\numberline {3.4}Selecting L-shaped genes with the \emph {heuristic} method}{14}
+\contentsline {section}{\numberline {4}Comparison between the selected lists}{20}
+\contentsline {subsection}{\numberline {4.1}Common results}{23}
+\contentsline {subsection}{\numberline {4.2}Plotting expression-methylation scaterplots}{25}
+\contentsline {section}{\numberline {5}Locating genes along the genome}{26}
+\contentsline {subsection}{\numberline {5.1}Annotating the genes in the chromosomes}{26}
+\contentsline {subsection}{\numberline {5.2}Visualization of selected genes in the chromosomes}{26}
+\contentsline {subsubsection}{\numberline {5.2.1}Preparing data sources information}{27}
+\contentsline {subsection}{\numberline {5.3}Overlap between CpG islands and selected genes}{28}

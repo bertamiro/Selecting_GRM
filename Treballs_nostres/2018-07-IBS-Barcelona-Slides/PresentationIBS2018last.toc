@@ -1,0 +1,7 @@
+\beamer@sectionintoc {1}{Introduction / Motivation}{3}{0}{1}
+\beamer@subsectionintoc {1}{1}{Genome-wide analysis of colorectal cancer}{3}{0}{1}
+\beamer@subsectionintoc {1}{2}{Objectives}{7}{0}{1}
+\beamer@sectionintoc {2}{Methods for selecting L-shaped patterns}{8}{0}{2}
+\beamer@subsectionintoc {2}{1}{A new algorithm}{9}{0}{2}
+\beamer@sectionintoc {3}{Results and Applications}{13}{0}{3}
+\beamer@sectionintoc {4}{Discussion and conclusions}{22}{0}{4}

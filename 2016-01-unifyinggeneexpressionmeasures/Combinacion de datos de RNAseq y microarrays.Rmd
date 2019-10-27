@@ -1,0 +1,33 @@
+---
+title: "Unificacion de dos medidas de expresion"
+author: "Francesc Carmona i Alex Sanchez"
+date: "18 gener de 2016"
+output: html_document
+---
+
+#Introduccion
+
+En los estudios que utilizan datos de expresion suele medirse esta mediante alguna tecnologia moderna como microarrays o RNAseq, pero raramente se utilizan ambas.
+
+Cuando como en este caso se dispone de ambos tipos de datos surge de forma natural la pregunta: ¿Cual nos ofrece una mejor estimacion de la expresion "real", lo cual en genral resulta dificil responder.
+
+El objetivo de este analisis es determinar hasta que punto los datos de expresion de que se dispone y que muestran una correlacion moderada entre ellos, pueden combinarse para dar una estimacion de la expresion mejor que la que se obtiene de cada tipo por separado.
+
+Los datos se han preprocesado siguiendo los pasos descritos en los documentos
+
+* [CorrelationAnalysis0NEW-ReadAndPreprocessDataV2.pdf](CorrelationAnalysis0NEW-ReadAndPreprocessDataV2.pdf)
+* [CorrelationAnalysis1NEW-MatchData.pdf](CorrelationAnalysis1NEW-MatchData.pdf)
+* [CorrelationAnalysis2NEWbis-ComputeCorrs.pdf](CorrelationAnalysis2NEWbis-ComputeCorrs.pdf)
+
+Los datos preprocesados y apareados por filas (genes) y columnas (muestras o lineas celulares) se encuentran disponibles en el archivo binario "matchedMarrRNAseqMethData.Rda".
+
+```{r echo=FALSE}
+load("matchedMarrRNAseqMethData.Rda")
+showV <- function(x){ 
+   cat (substitute(x),": ",dim(x),"\n") 
+} 
+showV(dataRNAseqCR)
+showV(dataMarrCR) 
+showV(dataMethCR)
+```
+

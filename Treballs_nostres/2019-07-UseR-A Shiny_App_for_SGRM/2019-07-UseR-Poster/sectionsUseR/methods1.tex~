@@ -1,0 +1,24 @@
+\section{Methods for pattern selection}
+
+\subsection{Based on Conditional Mutual Information}
+
+When studying methylation we are faced with two main questions:
+  \begin{enumerate}
+  \item Which genes exhibit an L-shape, and 
+  \item What is the optimal threshold for binarizing
+methylation data for each L-shape gene.
+  \end{enumerate}
+  
+To determine whether methylation and expression of a gene exhibit an L-shape,
+compute the conditional Mutual Information (MI) for different choices of threshold. % to binarize the methylation data.
+
+If we consider the continuous valued methylation and expression data as two random variables
+$X$ and $Y$, and denote a nominal threshold as $t$, the conditional MI can be written as: %  a weighted sum of MIs on the two sides of the threshold.
+\[
+\mathit{cMI}(t)=I(X,Y|X>t)P(X>t) + I(X,Y|X\le t)P(X\le t)
+\]
+%When $t$ is $0$ or $1$, $\mathit{cMI}$ equals to the mutual information derived 
+%from all data points.
+
+For an L-shape gene, as $t$ moves from 0 to 1, $\mathit{cMI}(t)$ first decreases and then increases, its value approaching zero when $t$ coincides with the reflection point. 
+ 

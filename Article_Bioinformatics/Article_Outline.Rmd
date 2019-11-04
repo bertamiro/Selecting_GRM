@@ -1,6 +1,6 @@
 ---
 title: |
-    | _A heuristic algorithm to select genes regulated by methylation_
+    | _A heuristic algorithm to select genes potentially regulated by methylation_
     | Esquema per l'article 
 author: "Alex Sanchez-Pla"
 date: "October 2019"
@@ -44,37 +44,38 @@ Ha de tenir tres parts: __Background, Results, Conclusions__ que són les parts 
 ## Què ha de venir aquí?
 
 1. Una revisió sobre la __metilació__:
-		- Què és
-		- Com actúa
-				- _No se si tocaria aquí_: Reflexió sobre què es metilen, els gens o les illes CpG o ...
-		- Quina relació té amb malalties com el càncer
+    + Què és
+    + Com actúa
+        - _No se si tocaria aquí_: Reflexió sobre què es metilen, els gens o les illes CpG o ...
+        - Quina relació té amb malalties com el càncer
 		
 2. Perquè pot ser útil/important/interessant trobar gens regulats per metilació
 
 3. Com s'ha abordat fins ara la cerca de gens regulats per metilació
-		- Metilació diferencial [__Revisar tesi Lara!!!]__
-		- Anàlisi de la correlació entre expressió i metilació
+    + Metilació diferencial [__Revisar tesi Lara!!!]__
+    + Anàlisi de la correlació entre expressió i metilació
 		
 4. Però perquè estem aquí (quin és el context de l'article?)
-				- Pot ser positiva però majoritàriament són Correlacions negatives
-				- Fins i tot si la relació és lineal convé no oblidar que l’ús de “r” es bastant trist només detecta si existeix relació ( __COMPTE: NO PODRIA SER QUE AQUI AIXÒ SIGUI UN AVENTATGE?__ Al cap i a la fi si estem buscant candidats amb detectar els possibles n'hi pot haver rou.
-				- Un altre tema és quan no té sentit la significació de la correlació: __Pot no haver linealitat ni monotonicitat però si L shape__
+    + Pot ser positiva però majoritàriament són Correlacions negatives
+    + Fins i tot si la relació és lineal convé no oblidar que l’ús de “r” es bastant trist només detecta si existeix relació ( __COMPTE: NO PODRIA SER QUE AQUI AIXÒ SIGUI UN AVENTATGE?__ Al cap i a la fi si estem buscant candidats amb detectar els possibles n'hi pot haver prou.
+    + Un altre tema és quan no té sentit la significació de la correlació: __Pot no haver linealitat ni monotonicitat però si L shape__
 
 ## Què tenim?
  - Backgrounds de treballs anteriors que podem adaptar per a les dues primeres parts
-		 - TFM Alfons, TFM Berta
-		 - Technical reports nostres
-		 - Articles a Mathematical abstracts
+    - TFM Alfons
+    - TFM Berta
+    - Technical reports nostres
+    - Articles a Mathematical abstracts
 		 
 ## Què ens falta
 Hem de veure com aborden el tema alguns articles que seleccionen gens regulats per metilació
 
-- _Massie (2017). The importance of DNA methylation in prostate cancer development_: Analitza relaco expressio en gens de 17 estudis i fa una mena de consens agafant els que mstren canvis en més de tres dels estudis. Proporciona correlacions entre sondes més que entre gens.
+- _Massie (2017). The importance of DNA methylation in prostate cancer development_: Analitza relacio expressio en gens de 17 estudis i fa una mena de consens agafant els que mstren canvis en més de tres dels estudis. Proporciona correlacions entre sondes més que entre gens.
 - _Long et alt (2017) The Genomic Impact of DNA CpG Methylation on Gene Expression_; Relationships in Prostate Cancer. Fa algunes coses interessants q podríem tenir en compte: 
     + Considera tot el TCGA   (Potser podríem en un apèndix explorar els diferents datasets)
     + Fa referència a la idea de que els GRM són "hundreds rather tah thousands"
     + Suggereix  una forma de trobar GRM a partir de les bases de dades
-- _Klett et al. (2018). ColoCare project_ amb dades d'expressio (GSE106582) i metilacio  (GSE101764) conte 194 mostres, 77 tumors i 117 de mucosa. 
+- _Klett et al. (2018). ColoCare project_  amb dades d'expressio (GSE106582) i metilacio  (GSE101764) conte 194 mostres, 77 tumors i 117 de mucosa. 
     + Utilitzen random forest per la classificacio de gens, treballant amb subsets  i (a) expressio diferencial de  log2FC > 0.5 i (b) expressio diferencial de  log2FC > 0.5 i Spearman corr coef > 0.5 que millora la classificacio. 
     + Two different models, one for negatively correlated genes and one for positively correlated genes. No list of genes published.
 
@@ -121,7 +122,7 @@ _Segurament és bona idea especificarĺos després del background_
     
 ### Programari per a l'anàlisi
 
-[_Això podria ser un article en si mateix però aquí també hi ha d'anar__]
+[ _Això podria ser un article en si mateix però aquí també hi ha d'anar_ ]
 
 - __Paquets__
 - __Aplicació Shiny__
@@ -140,7 +141,7 @@ _Segurament és bona idea especificarĺos després del background_
     Sempre podem canviar-ho per una major estringencia
 - No tenim clar que això sigui un classificador. 
 - Convé parlar també dels paràmetres: Hi ha molts paràmetres interrelacionats:
-     - Flexible
+    - Flexible
     - Difícil d’optimitzar
 
 ## Limitacions
@@ -150,7 +151,9 @@ _Segurament és bona idea especificarĺos després del background_
 - Problemes en la comparació amb altres mètodes: 
     - Compte amb la comparació:podem comparar nombre de gens seleccionats, però NO els ben seleccionats!
     - Això lliga amb la problemàtica anterior i amb la següent: Com comparem, amb les dades simulades (on sabriem TRUE/FALSE) o amb les dades reals
-    - L'aplicació a datasets la página de "Pubmeth" (http://www.pubmeth.org/) donde tienes la opción de buscar listas de genes (http://pubmeth.biobix.be/temp/static/) que se sepan metilados y en qué tipo de cáncer como la opción de revisar si tu gen de interés está metilado en cáncer y en qué tipo (http://pubmeth.biobix.be/mate/gene_cancer.html).
+    - Podem fer servir l'aplicació a datasets la página de "Pubmeth" (http://www.pubmeth.org/) on tens
+        + l'opció de buscar listes de gens (http://pubmeth.biobix.be/temp/static/) que se sap que estan metilats, en quin tipus de cancer es metilen epan metilados y en qué tipo de cáncer 
+        + l'opció de revisar si el teu gen d'interes està metilado en cáncer i en quin tipus (http://pubmeth.biobix.be/mate/gene_cancer.html).
 
 
 # Conclusions

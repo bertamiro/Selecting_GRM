@@ -45,7 +45,7 @@ code span.ot { color: #007020; }
 
 
 <section class="page-header">
-<h1 class="title toc-ignore project-name"><div class="line-block"><em>A heuristic algorithm to select genes regulated by methylation</em><br />
+<h1 class="title toc-ignore project-name"><div class="line-block"><em>A heuristic algorithm to select genes potentially regulated by methylation</em><br />
 Esquema per l’article</div></h1>
 <h4 class="author project-author">Alex Sanchez-Pla</h4>
 <h4 class="date project-date">October 2019</h4>
@@ -100,23 +100,46 @@ Esquema per l’article</div></h1>
 <div id="què-ha-de-venir-aquí" class="section level2">
 <h2><span class="header-section-number">4.1</span> Què ha de venir aquí?</h2>
 <ol style="list-style-type: decimal">
-<li><p>Una revisió sobre la <strong>metilació</strong>: - Què és - Com actúa - <em>No se si tocaria aquí</em>: Reflexió sobre què es metilen, els gens o les illes CpG o … - Quina relació té amb malalties com el càncer</p></li>
+<li>Una revisió sobre la <strong>metilació</strong>:
+<ul>
+<li>Què és</li>
+<li>Com actúa
+<ul>
+<li><em>No se si tocaria aquí</em>: Reflexió sobre què es metilen, els gens o les illes CpG o …</li>
+<li>Quina relació té amb malalties com el càncer</li>
+</ul></li>
+</ul></li>
 <li><p>Perquè pot ser útil/important/interessant trobar gens regulats per metilació</p></li>
-<li><p>Com s’ha abordat fins ara la cerca de gens regulats per metilació - Metilació diferencial [__Revisar tesi Lara!!!]__ - Anàlisi de la correlació entre expressió i metilació</p></li>
-<li><p>Però perquè estem aquí (quin és el context de l’article?) - Pot ser positiva però majoritàriament són Correlacions negatives - Fins i tot si la relació és lineal convé no oblidar que l’ús de “r” es bastant trist només detecta si existeix relació ( <strong>COMPTE: NO PODRIA SER QUE AQUI AIXÒ SIGUI UN AVENTATGE?</strong> Al cap i a la fi si estem buscant candidats amb detectar els possibles n’hi pot haver rou. - Un altre tema és quan no té sentit la significació de la correlació: <strong>Pot no haver linealitat ni monotonicitat però si L shape</strong></p></li>
+<li>Com s’ha abordat fins ara la cerca de gens regulats per metilació
+<ul>
+<li>Metilació diferencial [__Revisar tesi Lara!!!]__</li>
+<li>Anàlisi de la correlació entre expressió i metilació</li>
+</ul></li>
+<li>Però perquè estem aquí (quin és el context de l’article?)
+<ul>
+<li>Pot ser positiva però majoritàriament són Correlacions negatives</li>
+<li>Fins i tot si la relació és lineal convé no oblidar que l’ús de “r” es bastant trist només detecta si existeix relació ( <strong>COMPTE: NO PODRIA SER QUE AQUI AIXÒ SIGUI UN AVENTATGE?</strong> Al cap i a la fi si estem buscant candidats amb detectar els possibles n’hi pot haver prou.</li>
+<li>Un altre tema és quan no té sentit la significació de la correlació: <strong>Pot no haver linealitat ni monotonicitat però si L shape</strong></li>
+</ul></li>
 </ol>
 </div>
 <div id="què-tenim" class="section level2">
 <h2><span class="header-section-number">4.2</span> Què tenim?</h2>
 <ul>
-<li>Backgrounds de treballs anteriors que podem adaptar per a les dues primeres parts - TFM Alfons, TFM Berta - Technical reports nostres - Articles a Mathematical abstracts</li>
+<li>Backgrounds de treballs anteriors que podem adaptar per a les dues primeres parts
+<ul>
+<li>TFM Alfons</li>
+<li>TFM Berta</li>
+<li>Technical reports nostres</li>
+<li>Articles a Mathematical abstracts</li>
+</ul></li>
 </ul>
 </div>
 <div id="què-ens-falta" class="section level2">
 <h2><span class="header-section-number">4.3</span> Què ens falta</h2>
 <p>Hem de veure com aborden el tema alguns articles que seleccionen gens regulats per metilació</p>
 <ul>
-<li><em>Massie (2017). The importance of DNA methylation in prostate cancer development</em>: Analitza relaco expressio en gens de 17 estudis i fa una mena de consens agafant els que mstren canvis en més de tres dels estudis. Proporciona correlacions entre sondes més que entre gens.</li>
+<li><em>Massie (2017). The importance of DNA methylation in prostate cancer development</em>: Analitza relacio expressio en gens de 17 estudis i fa una mena de consens agafant els que mstren canvis en més de tres dels estudis. Proporciona correlacions entre sondes més que entre gens.</li>
 <li><em>Long et alt (2017) The Genomic Impact of DNA CpG Methylation on Gene Expression</em>; Relationships in Prostate Cancer. Fa algunes coses interessants q podríem tenir en compte:
 <ul>
 <li>Considera tot el TCGA (Potser podríem en un apèndix explorar els diferents datasets)</li>
@@ -189,7 +212,7 @@ Esquema per l’article</div></h1>
 </div>
 <div id="programari-per-a-lanàlisi" class="section level3">
 <h3><span class="header-section-number">5.1.4</span> Programari per a l’anàlisi</h3>
-<p>[_Això podria ser un article en si mateix però aquí també hi ha d’anar__]</p>
+<p>[ <em>Això podria ser un article en si mateix però aquí també hi ha d’anar</em> ]</p>
 <ul>
 <li><strong>Paquets</strong></li>
 <li><strong>Aplicació Shiny</strong></li>
@@ -229,7 +252,11 @@ Esquema per l’article</div></h1>
 <ul>
 <li>Compte amb la comparació:podem comparar nombre de gens seleccionats, però NO els ben seleccionats!</li>
 <li>Això lliga amb la problemàtica anterior i amb la següent: Com comparem, amb les dades simulades (on sabriem TRUE/FALSE) o amb les dades reals</li>
-<li>L’aplicació a datasets la página de “Pubmeth” (<a href="http://www.pubmeth.org/" class="uri">http://www.pubmeth.org/</a>) donde tienes la opción de buscar listas de genes (<a href="http://pubmeth.biobix.be/temp/static/" class="uri">http://pubmeth.biobix.be/temp/static/</a>) que se sepan metilados y en qué tipo de cáncer como la opción de revisar si tu gen de interés está metilado en cáncer y en qué tipo (<a href="http://pubmeth.biobix.be/mate/gene_cancer.html" class="uri">http://pubmeth.biobix.be/mate/gene_cancer.html</a>).</li>
+<li>Podem fer servir l’aplicació a datasets la página de “Pubmeth” (<a href="http://www.pubmeth.org/" class="uri">http://www.pubmeth.org/</a>) on tens
+<ul>
+<li>l’opció de buscar listes de gens (<a href="http://pubmeth.biobix.be/temp/static/" class="uri">http://pubmeth.biobix.be/temp/static/</a>) que se sap que estan metilats, en quin tipus de cancer es metilen epan metilados y en qué tipo de cáncer</li>
+<li>l’opció de revisar si el teu gen d’interes està metilado en cáncer i en quin tipus (<a href="http://pubmeth.biobix.be/mate/gene_cancer.html" class="uri">http://pubmeth.biobix.be/mate/gene_cancer.html</a>).</li>
+</ul></li>
 </ul></li>
 </ul>
 </div>

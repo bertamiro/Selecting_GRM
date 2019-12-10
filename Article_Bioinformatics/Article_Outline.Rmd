@@ -28,6 +28,8 @@ Sys.setlocale("LC_TIME", "C")
 
 (_He posat els apartas que es descriuen com "For Authors" de BMC Bioinformatics:_)
 
+(De totes formes __potser millor enviar a PLOS ONE__ ja que l'estil és semblant a aquest: https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0118621#ack)
+
 # TitlePage
  El títol "A heuristic algorithm to select genes potentially regulated by methylation" està bé, Falta veure si l'hem emprat exactament igual i quansts cops, 
 

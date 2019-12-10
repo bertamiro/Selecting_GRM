@@ -83,6 +83,11 @@ Hem de veure com aborden el tema alguns articles que seleccionen gens regulats p
     + Methylmix (Bioconductor)
     + PubMeth: Reviewed methylation database in cancer. http://pubmeth.biobix.be/mate/gene_cancer.html
     + Altres ?
+    
+### Algunes coses noves vistes a la tesi de Lara Nonell
+
+- Parla d'una base de dades que es diu **Metylome Resource** [rnbeads.org](rnbeads.org). Potser aqui es puguin trobar gens "realment metilats"
+- Associaccions no lineals: Quan la variable respostya es continua i la relacio no és lineal tenim un problema. Això ho estudia la LAra (cap. 5 i introdueix algunes idees que pootser podem estendre a altres llocs)
 
 ## Objectius
 

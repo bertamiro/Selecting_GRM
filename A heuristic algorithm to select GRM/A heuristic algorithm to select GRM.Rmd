@@ -1,0 +1,40 @@
+---
+title:  _A heuristic algorithm to select genes potentially regulated by methylation_
+author:
+  - name: Alex Sanchez-Pla
+    email: asanchez@ub.edu
+    affiliation: Universitat de Barcelona, (UB), Spain
+    corresponding: asanchez@ub.edu
+  - name: Berta Miro
+    email: berta.mirocau@gmail.com
+    affiliation: International Rice Research Institute, (IRRI), Philippines
+address:
+  - code: Universitat de Barcelona
+    address:  Departament of Genetics Microbiology and Statistics, Avda Diagonal 645, Barcelona, 08028
+  - code: International Rice Research Institute
+    address: Department, Street, City, State, Zip
+
+abstract: |
+  Methylation is a key process in cancer. Usually it acts by inhibiting the expression of the gene but if methylation is low then any values of expression, high or low, can be found. This suggests that to select genes regulated by methylation one may look for patterns in the relation between gene expression and methylation showing either an L-shape or negative correlation between expression and methylation. We have developed a heuristic algorithm that mimics the process of visually selecting an “L-shape”, that is genes that can show a wide range of expression values (low to high) when methylation is low, but only low expressions for intermediate or high methylation. We have compared the method with naïve correlation and, despite not being able to quantify its accuracy -because no dataset with “TRUE” L-shaped genes is available- its performance seems to be very good especially due to its flexibility. The method has been implemented in an R package, “Lheuristic” and a Shiny application, both available from GitHub (http://github.com/alexsanchezpla). Given two matrices -expression and methylation values - with the same row and column names the program offers the possibility to select genes based on either negative correlation, the heuristic algorithm or both methods at once. Once genes have been selected, results can be interactively reviewed, plotted or downloaded.
+  
+author_summary: |
+
+
+bibliography: mybibfile.bib
+output: rticles::plos_article
+csl: plos.csl
+---
+
+# Introduction and Background
+
+<!-- Un exemple d'article amb una estructura semblant: 
+https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0118621#sec002
+-->
+
+# Material and Methods
+
+# Results
+
+# Discussion
+
+# References {#references .unnumbered}

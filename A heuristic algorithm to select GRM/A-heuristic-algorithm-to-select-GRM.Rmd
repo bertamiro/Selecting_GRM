@@ -21,7 +21,7 @@ author_summary: |
 
 
 bibliography: mybibfile.bib
-output: articles::plos_article
+output: rticles::plos_article
 csl: plos.csl
 ---
 

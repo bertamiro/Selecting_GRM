@@ -36,11 +36,20 @@ Sys.setlocale("LC_TIME", "C")
 [_Revisar títols ja publicats per nosaltres (SLIDES, POSTERS, ALTRES ARTICLES)_]
 
 # Abstract
-Ha de tenir tres parts: __Background, Results, Conclusions__ que són les parts de l'article.
+<!-- Ha de tenir tres parts: __Background, Results, Conclusions__ que són les parts de l'article.
+COMPTE: Això no és el que surt a l'article
+-->
 
 # Keywords: Methylation, L-shape, Gene regulation
 
-# Background 
+<!-- SECCIONS: -->
+<!-- Originalment vaig pensar que n'hi havia d'haver **només** tres : __Background, Results, Conclusions__ perque deu ser el que té el template. -->
+<!-- De fet l'article que es cita d'exemple té les típiques i s'adiu molt al que fem nosaltres: -->
+<!-- _Introduction, Material and Methods, Results, Discussion, Supporting Information_ de forma que deu ser més flexible. -->
+
+
+
+# Introduction and background 
 [_The Background section should explain the background to the study, its aims, a summary of the existing literature and why this study was necessary._]
 
 ## Què ha de venir aquí?

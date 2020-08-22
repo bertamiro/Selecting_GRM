@@ -19,11 +19,11 @@ abstract: |
   
 author_summary: |
 
-
 bibliography: mybibfile.bib
 output: rticles::plos_article
 csl: plos.csl
 ---
+
 
 # Introduction and Background
 
@@ -51,10 +51,71 @@ However, high-throughput methodologies that offer an impartial approach to the i
 
 As we have described in the previous section, although there are various approaches to selecting genes based on the relationship between methylation levels and gene expression, none of them are completely satisfactory. 
 
-In this section we present the method we have developed to select genes in which the pattern of the relationship is "L-shaped." In fact, taking biological processes into account, this is a very common and very reasonably expected pattern when genes are regulated by methylation. Furthermore, as we will see later, it is not only important but can be partially ignored by "naïve" methods such as significant negative correlation, which increases the interest of our proposal.
+In this section we present the method we have developed to select genes in which the pattern of the relationship is "L-shaped." In fact, taking biological processes into account, this is a very common and very reasonably expected pattern when genes are regulated by methylation. Furthermore, as we will see later, it is not only important but can be partially missed by "naïve" methods such as significant negative correlation, which increases the interest of our proposal.
+
+## Rationale of the approach
+
+After trying different approaches to detect L-shapes, one often comes back to an intuïtive idea: If we are looking for genes whose expression can take any value when methylation is low, and tends to decrease as methylation increases one should observe that points in the methylation-expression scatterplot tend to be scattered near the vertical and horizontal positive axes showing an L-shape. If this does not happen genes can be found anywhere in the scatterplot and we can call it a non-L-shape. That is:
+
+- The more the points cluster near the  vertical and horizontal axes, the more L-shaped can be considered the scatterplot.
+- The more the points move away from the axes, the least L-shaped the scatterplot is.
+
+Figure 1 illustrates these two possibilities in two real but non-identified genes.
+
+## An algorithm to select L-shape scatterplots
+
+The intuitive idea presented above can be made more explicit by introducing a ``three-band rule'' as follows:
+
+\begin{enumerate}
+\item Overimpose a $3\times 3$ grid on the scatterplot.
+\item Classify the scatterplot as \textbf{``L'' or ``non-L''} based on a small set of conditions:
+\begin{enumerate}
+  \item There must be a \emph{minimum} number of points in the upper-left (cell (1,1)) and lower right (cell (3,3)) corners of the grid.
+  \item There must be a \emph{maximum} number of points in the upper right (cell (1,3)) because points there mean hypermethylation and hyperexpression which is the opposite of what we are looking for.
+  \item We will usually \emph{not require to have a minimum of points in cell (3,1)} unless we are really willing to have an L-shape (in our setting we will also be happy tho recover diagonals, which also reflect a negative correlation!).
+\end{enumerate}
+\item Score points on each subgrid in such a way that
+\begin{enumerate}
+	\item Points in permitted regions (left-outer margin, i.e. cells: (1,1), (2,2), (3,1), (3,2), (3,3)) score positively if the scatterplot has been classified as L or zero if it has been classified as non-L.
+	\item Points in non-desired regions (outer band. i.e. cells (1,2), (1,3), (2,3)) score negatively in all cases.
+	\item Some regions may be declared neutral and not-score, such as cell (2,2).
+\end{enumerate}
+\item Use cross-validation to tune scoring parameters (\textit{if a set of positive and negative L-shaped genes is available}). 
+\end{enumerate}
+
+The previous scheme can be summarized using the following equation.
+\begin{equation}
+S(X) = W_L \circ X \times \mathbf{1}_L(X) + W_{L^C} \circ X \times \mathbf{1}_{L^c}(X),
+\end{equation}
+where
+\begin{itemize}
+\item ${X}$ is the matrix of \emph{counts}, i.e. the number of counts in each cell of the grid,
+\item ${W_L}$ is the matrix of scores per cell and point \emph{if the scatterplot has been classified as $L$},
+\item ${W_{L^c}}$ is the matrix of scores per cell and point \emph{if the scatterplot has been classified as non-$L$ ($L^c$)},
+\end{itemize}
+and $\circ$ represents the hadamard product of the two matrices $W_{L/L^c}$ (i.e. elementwise multiplication of the two matrices) and $\mathbf{1}_{L/L^c}()$ is the indicator function for $L$ or $L^c$.
+
+The fact that the scatterplot is assigned to $L$ or $L^c$ can also be described as the hadamard product of three matrices:
+\begin{equation}
+\mathbf{1}_L(X) = \bigwedge_{i,j} X \circ C \circ \left( mMP \times \sum_{i,j}x_{ij}\right),
+\end{equation}
+where 
+\begin{itemize}
+\item ${X}$ is the matrix of \emph{counts}, i.e. the number of counts in each cell of the grid,
+\item $C$ is the matrix of conditions to be verified \emph{if the scatterplot has to be classified as $L$},
+\item $mMP$ is the matrix of minimum and Maximum Percentages of points to have in each cell \emph{if the scatterplot has to be classified as $L$},
+\item $\circ$ represents the pointwise logical operation which allows that the product of the three cells becomes a logical operation and
+\item $\bigwedge_{i,j}$ represents an logical ``AND'' operation of all cells, that is if all cells are TRUE the result is assigned to $L$ and if one fails it is assigned to $L^c$.
+\end{itemize}
+
+
+## On the sensitivity and specificity of the method
+
+### Tuning the algorithm's parameters
 
 ## Synthetic dataset generation for the simulation studies
-The R package simstudy  was used to create 4 artificial datasets by using the splines method (https://cran.r-project.org/web/packages/simstudy/simstudy.pdf).  The package allows for designing data points on a pre-defined spline, in which knots, limits and dispersion can be tuned. The splines are generated based on a fixed X variable representing the methylation values. The artificial datasets contained a total of 1000 genes, and the data points were developed based on 2 parameters with 2 levels each. The first parameter was the number of samples and the second the % of true regulated by methylation genes that a sample would contain (with an expression by methylation scatterplot or spline following an L-shape). The number of samples considered was of 50 and 1000, and the % of true methylated genes  in each dataset was 1% and 10%. Additionally, the shape of the negative genes (not regulated by methylation) was also pre-defined and classified into 3 different scatterplot shapes (Figure XXX) and the percentage of genes in each category equaled to 1/3 prior subtraction of the true GRM genes.
+
+The R package `simstudy`  was used to create 4 artificial datasets by using the splines method (https://cran.r-project.org/web/packages/simstudy/simstudy.pdf).  The package allows for designing data points on a pre-defined spline, in which knots, limits and dispersion can be tuned. The splines are generated based on a fixed X variable representing the methylation values. The artificial datasets contained a total of 1000 genes, and the data points were developed based on 2 parameters with 2 levels each. The first parameter was the number of samples and the second the % of true regulated by methylation genes that a sample would contain (with an expression by methylation scatterplot or spline following an L-shape). The number of samples considered was of 50 and 1000, and the % of true methylated genes  in each dataset was 1% and 10%. Additionally, the shape of the negative genes (not regulated by methylation) was also pre-defined and classified into 3 different scatterplot shapes (Figure XXX) and the percentage of genes in each category equaled to 1/3 prior subtraction of the true GRM genes.
 
 ## Simulation of heuristic classification with the synthetic datasets
 The heuristic method was tested with the 4 artificial datasets: 50 samples, 1% of GRM genes; 50 samples, 10% GRM genes; 1000 samples, 1% GRM genes; and 1000 samples, 10% GRM genes. After running the model, sensitivity, specificity, and accuracy were measured and compared between datsets.
@@ -71,6 +132,13 @@ Sensitivity, specificity and accuracy for the heuristic model were measured for 
 
 # Supporting information
 
-  
-
 # References {#references .unnumbered}
+
+\clearpage
+
+# Figures and captions
+
+![Example of non-Lshape vs L-shape for the methylation--expression scatterplots associated with two fictitial genes](figures/nonLshapeVSLshape1.png){#id .class width=50% height=50%}
+
+
+

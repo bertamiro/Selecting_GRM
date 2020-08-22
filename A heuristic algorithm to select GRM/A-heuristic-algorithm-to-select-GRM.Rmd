@@ -48,18 +48,23 @@ Other methodologies to identify methylated genes associated with cancer is throu
 However, high-throughput methodologies that offer an impartial approach to the identification of genes regulated by methylation still need further development and fine-tuning. Here we present such a methodology that will select, out of a gene expression and DNA methylation subsets, those genes that present a negative correlation, and are therefore regulated by methylation. The L-shaped heuristic method to identify genes regulated by methylation was tested and tuned for experimental expression and methylation paired datasets after normalization using other standard methods.
 
 # Material and Methods
-##Synthetic dataset generation for the simulation studies
+
+As we have described in the previous section, although there are various approaches to selecting genes based on the relationship between methylation levels and gene expression, none of them are completely satisfactory. 
+
+In this section we present the method we have developed to select genes in which the pattern of the relationship is "L-shaped." In fact, taking biological processes into account, this is a very common and very reasonably expected pattern when genes are regulated by methylation. Furthermore, as we will see later, it is not only important but can be partially ignored by "naïve" methods such as significant negative correlation, which increases the interest of our proposal.
+
+## Synthetic dataset generation for the simulation studies
 The R package simstudy  was used to create 4 artificial datasets by using the splines method (https://cran.r-project.org/web/packages/simstudy/simstudy.pdf).  The package allows for designing data points on a pre-defined spline, in which knots, limits and dispersion can be tuned. The splines are generated based on a fixed X variable representing the methylation values. The artificial datasets contained a total of 1000 genes, and the data points were developed based on 2 parameters with 2 levels each. The first parameter was the number of samples and the second the % of true regulated by methylation genes that a sample would contain (with an expression by methylation scatterplot or spline following an L-shape). The number of samples considered was of 50 and 1000, and the % of true methylated genes  in each dataset was 1% and 10%. Additionally, the shape of the negative genes (not regulated by methylation) was also pre-defined and classified into 3 different scatterplot shapes (Figure XXX) and the percentage of genes in each category equaled to 1/3 prior subtraction of the true GRM genes.
 
-##Simulation of heuristic classification with the synthetic datasets
+## Simulation of heuristic classification with the synthetic datasets
 The heuristic method was tested with the 4 artificial datasets: 50 samples, 1% of GRM genes; 50 samples, 10% GRM genes; 1000 samples, 1% GRM genes; and 1000 samples, 10% GRM genes. After running the model, sensitivity, specificity, and accuracy were measured and compared between datsets.
 
 # Results
 
-##Measures of performance for the heuristic method with synthetic datasets
+## Measures of performance for the heuristic method with synthetic datasets
 Sensitivity, specificity and accuracy for the heuristic model were measured for the 4 synthetic datsets (Figure [ssa]) with predefined parameters described in the above section. Specificity was the parameter that scored highest in all datsets, with values between 0.99 (for the datasets with 50 samples) and 1 (for the datasets with 1000 samples). The second highest parameter was accuracy. In this, both datasets containing 1% of GRM genes scored 0.99, whereas the datasets with 10% of GRM  genes scored 0.93 (for the one with 50 samples) and 0.92 (for the one with 1000 samples). Finally, the sensitivity values were the lowest in the combination of 1% GRM and 1000 samples (0.1) and highest for 1% GRM and 50 samples (0.5).  These results indicate that the classification scored better non-L shaped scatterplots (true negatives) than L-shaped scatterplots (true positives).
 
-![ssa](senspecacc.png "Sensitivity, specificity and accuracy for the 4 synthetic dastets")
+<!-- ![ssa](senspecacc.png "Sensitivity, specificity and accuracy for the 4 synthetic dastets") -->
 
 
 # Discussion

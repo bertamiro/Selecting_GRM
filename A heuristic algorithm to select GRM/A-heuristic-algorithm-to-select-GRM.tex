@@ -442,11 +442,19 @@ non-identified genes.
 \subsection{An algorithm to select L-shape
 scatterplots}\label{an-algorithm-to-select-l-shape-scatterplots}}
 
-The intuitive idea presented above can be made more explicit by
-introducing a ``three-band rule'' as follows:
+Assuming that genes potentially regulated by methylation can be selected
+from between L-shaped expression-methylation scatterplots, finding a way
+to separate L-shape from non-L shape ones is a reasonable first step. It
+could be argued that this could be done manually, but given the high
+number of -possibly highly variable- figures to be searched, an
+algorithm to automate this process is a much better option.
+
+The algorithm can be developed starting from the intuitive distinction
+betrween L and non-L discussed above and making it more explicit as
+follows:
 
 \begin{enumerate}
-\item Overimpose a $3\times 3$ grid on the scatterplot.
+\item Given a scatterplot methylation-expression $X$, overimpose a $k\times m$ grid on it so that each point is assigned to one and only one of the grid's cell. Usually $k=m=3$ so this will be the values used in th efollowing.
 \item Classify the scatterplot as \textbf{``L'' or ``non-L''} based on a small set of conditions:
 \begin{enumerate}
   \item There must be a \emph{minimum} number of points in the upper-left (cell (1,1)) and lower right (cell (3,3)) corners of the grid.

@@ -314,7 +314,6 @@ ggplot(data = dta5x, aes(x=methylation, y=expression1700)) +
 
 
 colNames5a <- names(dta5x)[3:252]
-
 ```
 
 After generating the L and non-L genes, we format the dataset according to the requirements of the pipeline. We transpose the variables and create a "methylation dataset" by multiplying the variable X.

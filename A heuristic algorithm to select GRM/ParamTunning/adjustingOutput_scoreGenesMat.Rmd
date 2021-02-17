@@ -8,6 +8,9 @@ editor_options:
 ---
 
 ```{r}
+library(devtools)
+install_github("bertamiro/Lheuristic")
+
 library(Lheuristic) #from bertamiro @ github
 library(caret)
 library(purrr)

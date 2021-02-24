@@ -80,10 +80,12 @@ dt1 <- genSpline(dt = dt, newvar = paste0("expression",i),
 dt1x <- abs(dt1)
 
 #variable visualization
-ggplot(data = dt1x, aes(x=methylation, y=expression30)) +
+pb1 <- ggplot(data = dt1x, aes(x=methylation, y=expression30)) +
   geom_point(color = "grey35", size = 0.75) +
+  geom_hline(yintercept = 3.34, color= "grey70", size=0.5)+geom_hline(yintercept = 6.67, color= "grey70", size=.5)+
+  geom_vline(xintercept = 0.34, color= "grey70", size=.5)+geom_vline(xintercept = 0.67, color= "grey70", size=.5)+
   #geom_smooth(se=FALSE, color="blue", size = 1, method = "auto") +
-  theme_bw() + theme(panel.grid.minor = element_blank())
+  theme_bw() + theme(panel.grid = element_blank())
 
 
 colNames1 <- names(dt1x)[3:102]
@@ -111,10 +113,12 @@ dt2 <- genSpline(dt = dt, newvar = paste0("expression",i),
 dt2x <- abs(dt2)
 
 #variable visualization
-ggplot(data = dt2x, aes(x=methylation, y=expression140)) +
+pb2 <- ggplot(data = dt2x, aes(x=methylation, y=expression184)) +
   geom_point(color = "grey35", size = 0.75) +
+  geom_hline(yintercept = 3.34, color= "grey70", size=0.5)+geom_hline(yintercept = 6.67, color= "grey70", size=.5)+
+  geom_vline(xintercept = 0.34, color= "grey70", size=.5)+geom_vline(xintercept = 0.67, color= "grey70", size=.5)+
   #geom_smooth(se=FALSE, color="blue", size = 1, method = "auto") +
-  theme_bw() + theme(panel.grid.minor = element_blank())
+  theme_bw() + theme(panel.grid = element_blank()) 
 
 
 colNames2 <- names(dt2x)[3:102]
@@ -142,10 +146,12 @@ dt3 <- genSpline(dt = dt, newvar = paste0("expression",i),
 dt3x <- abs(dt3)
 
 #variable visualization
-ggplot(data = dt3x, aes(x=methylation, y=expression282)) +
+pb3 <- ggplot(data = dt3x, aes(x=methylation, y=expression282)) +
   geom_point(color = "grey35", size = 0.75) +
+  geom_hline(yintercept = 3.34, color= "grey70", size=0.5)+geom_hline(yintercept = 6.67, color= "grey70", size=.5)+
+  geom_vline(xintercept = 0.34, color= "grey70", size=.5)+geom_vline(xintercept = 0.67, color= "grey70", size=.5)+
   #geom_smooth(se=FALSE, color="blue", size = 1, method = "auto") +
-  theme_bw() + theme(panel.grid.minor = element_blank())
+  theme_bw() + theme(panel.grid = element_blank())
 
 
 colNames3 <- names(dt3x)[3:102]
@@ -181,10 +187,12 @@ dta1 <- genSpline(dt = dta, newvar = paste0("expression",i),
 dta1x <- abs(dta1)
 
 #variable visualization
-ggplot(data = dta1x, aes(x=methylation, y=expression401)) +
+pb4 <- ggplot(data = dta1x, aes(x=methylation, y=expression401)) +
   geom_point(color = "grey35", size = 0.75) + ylim(0,11)+
+  geom_hline(yintercept = 3.34, color= "grey70", size=0.5)+geom_hline(yintercept = 6.67, color= "grey70", size=.5)+
+  geom_vline(xintercept = 0.34, color= "grey70", size=.5)+geom_vline(xintercept = 0.67, color= "grey70", size=.5)+
   #geom_smooth(se=FALSE, color="blue", size = 1, method = "auto") +
-  theme_bw() + theme(panel.grid.minor = element_blank())
+  theme_bw() + theme(panel.grid = element_blank())
 
 
 colNames1a <- names(dta1x)[3:252]
@@ -214,10 +222,12 @@ dta2 <- genSpline(dt = dta, newvar = paste0("expression",i),
 dta2x <- abs(dta2)
 
 #variable visualization
-ggplot(data = dta2x, aes(x=methylation, y=expression601)) +
+pb5 <- ggplot(data = dta2x, aes(x=methylation, y=expression601)) +
   geom_point(color = "grey35", size = 0.75) + ylim(0,10)+
+  geom_hline(yintercept = 3.34, color= "grey70", size=0.5)+geom_hline(yintercept = 6.67, color= "grey70", size=.5)+
+  geom_vline(xintercept = 0.34, color= "grey70", size=.5)+geom_vline(xintercept = 0.67, color= "grey70", size=.5)+
   #geom_smooth(se=FALSE, color="blue", size = 1, method = "auto") +
-  theme_bw() + theme(panel.grid.minor = element_blank())
+  theme_bw() + theme(panel.grid = element_blank())
 
 
 colNames2a <- names(dta2x)[3:252]
@@ -245,10 +255,12 @@ dta3 <- genSpline(dt = dta, newvar = paste0("expression",i),
 dta3x <- abs(dta3)
 
 #variable visualization
-ggplot(data = dta3x, aes(x=methylation, y=expression901)) +
+pb6 <- ggplot(data = dta3x, aes(x=methylation, y=expression901)) +
   geom_point(color = "grey35", size = 0.75) +
+  geom_hline(yintercept = 3.34, color= "grey70", size=0.5)+geom_hline(yintercept = 6.67, color= "grey70", size=.5)+
+  geom_vline(xintercept = 0.34, color= "grey70", size=.5)+geom_vline(xintercept = 0.67, color= "grey70", size=.5)+
   #geom_smooth(se=FALSE, color="blue", size = 1, method = "auto") +
-  theme_bw() + theme(panel.grid.minor = element_blank())
+  theme_bw() + theme(panel.grid = element_blank())
 
 
 colNames3a <- names(dta3x)[3:502]
@@ -276,10 +288,12 @@ dta4 <- genSpline(dt = dtac, newvar = paste0("expression",i),
 dta4x <- abs(dta4)
 
 #variable visualization
-ggplot(data = dta4x, aes(x=methylation, y=expression1400)) +
+pb7 <- ggplot(data = dta4x, aes(x=methylation, y=expression1400)) +
   geom_point(color = "grey35", size = 0.75) + xlim(0,1)+
+  geom_hline(yintercept = 3.34, color= "grey70", size=0.5)+geom_hline(yintercept = 6.67, color= "grey70", size=.5)+
+  geom_vline(xintercept = 0.34, color= "grey70", size=.5)+geom_vline(xintercept = 0.67, color= "grey70", size=.5)+
   #geom_smooth(se=FALSE, color="blue", size = 1, method = "auto") +
-  theme_bw() + theme(panel.grid.minor = element_blank())
+  theme_bw() + theme(panel.grid = element_blank())
 
 
 colNames4a <- names(dta4x)[3:252]
@@ -307,14 +321,24 @@ dta5 <- genSpline(dt = dtav, newvar = paste0("expression",i),
 dta5x <- abs(dta5)
 
 #variable visualization
-ggplot(data = dta5x, aes(x=methylation, y=expression1700)) +
+pb8 <- ggplot(data = dta5x, aes(x=methylation, y=expression1700)) +
   geom_point(color = "grey35", size = 0.75) + xlim(0,1)+
+  geom_hline(yintercept = 3.34, color= "grey70", size=0.5)+geom_hline(yintercept = 6.67, color= "grey70", size=.5)+
+  geom_vline(xintercept = 0.34, color= "grey70", size=.5)+geom_vline(xintercept = 0.67, color= "grey70", size=.5)+
   #geom_smooth(se=FALSE, color="blue", size = 1, method = "auto") +
-  theme_bw() + theme(panel.grid.minor = element_blank())
+  theme_bw() + theme(panel.grid = element_blank())
 
 
 colNames5a <- names(dta5x)[3:252]
 ```
+
+```{r}
+figure2 <- ggarrange(pb1, pb2, pb3, pb4, pb5, pb6, pb7, pb8,
+                     labels= c("A", "B", "C", "D", "E", "F", "G", "H"),
+                    ncol = 3, nrow = 3)
+figure2
+```
+
 
 After generating the L and non-L genes, we format the dataset according to the requirements of the pipeline. We transpose the variables and create a "methylation dataset" by multiplying the variable X.
 

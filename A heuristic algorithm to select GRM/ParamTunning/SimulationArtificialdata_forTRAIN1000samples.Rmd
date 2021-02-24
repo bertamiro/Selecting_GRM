@@ -500,7 +500,7 @@ colnames(met1x) <- colnames(expr1x)
 
 
 # write.csv(met1x, "methylation1_simulTuning1000.csv")
-# write.csv(expr1x, "expression1_simulTuning1000.csv")
+write.csv(expr1x, "expression1_simulTuning1000.csv")
 ```
 
 

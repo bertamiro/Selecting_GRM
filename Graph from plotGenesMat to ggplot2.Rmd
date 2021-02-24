@@ -1,0 +1,162 @@
+---
+title: "plot graph paper"
+author: "BM"
+date: "2/17/2021"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+
+library(ggplot2)
+library("ggpubr")
+
+
+plotGenesMat (mets=DAMetilData[selectedGene, ], 
+              expres=DAExprData[selectedGene,], x1=1/3, x2=2/3, 
+              percY1=1/3, percY2=2/3,
+              fileName=NULL, plotGrid = TRUE)
+
+
+```
+
+
+```{r}
+selectedGene <- c("ALDH1A1", "IL1R2")
+
+mets= unlist(as.data.frame(t(DAMetilData[selectedGene, ])))
+expres= unlist(as.data.frame(t(DAExprData[selectedGene,])))
+
+DAd <- data.frame(methylation=mets,expression=expres)
+DAdL <- DAd[1:30,]
+DAdL1 <- DAd[31:60,]
+
+p1 <- ggplot(data = DAdL, aes(x=methylation, y=expression)) +
+  geom_point(color = "grey35", size = 0.75) + 
+  geom_hline(yintercept = 6.64, color= "grey70", size=0.5)+geom_hline(yintercept = 9.28, color= "grey70", size=.5)+
+  geom_vline(xintercept = 0.34, color= "grey70", size=.5)+geom_vline(xintercept = 0.67, color= "grey70", size=.5)+
+  #geom_smooth(se=FALSE, color="blue", size = 1, method = "auto") +
+  #scale_x_continuous(breaks = c(1/3, 2/3), labels= NULL)+
+  #scale_y_continuous(limits= c(0,11), breaks = c(3.33, 6.66), labels= NULL)+
+  theme_bw() + theme(panel.grid = element_blank())
+
+p2 <- ggplot(data = DAdL1, aes(x=methylation, y=expression)) +
+  geom_point(color = "grey35", size = 0.75) +
+  geom_hline(yintercept = 6.14, color= "grey70", size=0.5)+geom_hline(yintercept = 8.78, color= "grey70", size=.5)+
+  geom_vline(xintercept = 0.34, color= "grey70", size=.5)+geom_vline(xintercept = 0.67, color= "grey70", size=.5)+
+  #geom_smooth(se=FALSE, color="blue", size = 1, method = "auto") +
+  #scale_x_continuous(breaks = c(1/3, 2/3), labels= NULL)+
+  #scale_y_continuous(limits= c(0,11), breaks = c(3.33, 6.66), labels= NULL)+
+  theme_bw() + theme(panel.grid = element_blank())
+
+```
+
+
+```{r}
+selectedGene1 <- c("RARRES1", "ACADVL")
+
+mets1= unlist(as.data.frame(t(DAMetilData[selectedGene1, ])))
+expres1= unlist(as.data.frame(t(DAExprData[selectedGene1,])))
+
+DAd1 <- data.frame(methylation=mets1,expression=expres1)
+DAdL2 <- DAd1[1:30,]
+DAdnL <- DAd1[31:60,]
+
+p3 <- ggplot(data = DAdL2, aes(x=methylation, y=expression)) +
+  geom_point(color = "grey35", size = 0.75) + 
+  geom_hline(yintercept = 5.64, color= "grey70", size=0.5)+geom_hline(yintercept = 8.28, color= "grey70", size=.5)+
+  geom_vline(xintercept = 0.34, color= "grey70", size=.5)+geom_vline(xintercept = 0.67, color= "grey70", size=.5)+
+  #geom_smooth(se=FALSE, color="blue", size = 1, method = "auto") +
+  #scale_x_continuous(breaks = c(1/3, 2/3), labels= NULL)+
+  #scale_y_continuous(limits= c(0,11), breaks = c(3.33, 6.66), labels= NULL)+
+  theme_bw() + theme(panel.grid = element_blank())
+
+  
+p4 <- ggplot(data = DAdnL, aes(x=methylation, y=expression)) +
+  geom_point(color = "grey35", size = 0.75) + ylim(0,11)+xlim(0,1)+
+  geom_hline(yintercept = 3.34, color= "grey70", size=0.5)+geom_hline(yintercept = 6.67, color= "grey70", size=.5)+
+  geom_vline(xintercept = 0.34, color= "grey70", size=.5)+geom_vline(xintercept = 0.67, color= "grey70", size=.5)+
+  #geom_smooth(se=FALSE, color="blue", size = 1, method = "auto") +
+  #scale_x_continuous(breaks = c(1/3, 2/3), labels= NULL)+
+  #scale_y_continuous(limits= c(0,11), breaks = c(3.33, 6.66), labels= NULL)+
+  theme_bw() + theme(panel.grid = element_blank())
+
+```
+
+```{r}
+selectedGene2 <- c("A2ML1", "ABCA3")
+
+mets2= unlist(as.data.frame(t(DAMetilData[selectedGene2, ])))
+expres2= unlist(as.data.frame(t(DAExprData[selectedGene2,])))
+
+DAd2 <- data.frame(methylation=mets2,expression=expres2)
+DAdnL1 <- DAd2[1:30,]
+DAdnL2 <- DAd2[31:60,]
+
+p5 <- ggplot(data = DAdnL1, aes(x=methylation, y=expression)) +
+  geom_point(color = "grey35", size = 0.75) + 
+  geom_hline(yintercept = 4.66, color= "grey70", size=0.5)+geom_hline(yintercept = 6.12, color= "grey70", size=.5)+
+  geom_vline(xintercept = 0.34, color= "grey70", size=.5)+geom_vline(xintercept = 0.67, color= "grey70", size=.5)+
+  #geom_smooth(se=FALSE, color="blue", size = 1, method = "auto") +
+  #scale_x_continuous(breaks = c(1/3, 2/3), labels= NULL)+
+  #scale_y_continuous(limits= c(0,11), breaks = c(3.33, 6.66), labels= NULL)+
+  theme_bw() + theme(panel.grid = element_blank())
+
+  
+p6 <- ggplot(data = DAdnL2, aes(x=methylation, y=expression)) +
+  geom_point(color = "grey35", size = 0.75) +
+  geom_hline(yintercept = 6.6, color= "grey70", size=0.5)+geom_hline(yintercept = 7.9, color= "grey70", size=.5)+
+  geom_vline(xintercept = 0.34, color= "grey70", size=.5)+geom_vline(xintercept = 0.67, color= "grey70", size=.5)+
+  #geom_smooth(se=FALSE, color="blue", size = 1, method = "auto") +
+  #scale_x_continuous(breaks = c(1/3, 2/3), labels= NULL)+
+  #scale_y_continuous(limits= c(0,11), breaks = c(3.33, 6.66), labels= NULL)+
+  theme_bw() + theme(panel.grid = element_blank())
+
+```
+
+```{r}
+selectedGene3 <- c("ABAT", "AADAC")
+
+mets3= unlist(as.data.frame(t(DAMetilData[selectedGene3, ])))
+expres3= unlist(as.data.frame(t(DAExprData[selectedGene3,])))
+
+DAd3 <- data.frame(methylation=mets3,expression=expres3)
+DAdnL3 <- DAd3[1:30,]
+DAdnL4 <- DAd3[31:60,]
+
+p7 <- ggplot(data = DAdnL3, aes(x=methylation, y=expression)) +
+  geom_point(color = "grey35", size = 0.75) + 
+  geom_hline(yintercept = 5.45, color= "grey70", size=0.5)+geom_hline(yintercept = 7.41, color= "grey70", size=.5)+
+  geom_vline(xintercept = 0.34, color= "grey70", size=.5)+geom_vline(xintercept = 0.67, color= "grey70", size=.5)+
+  #geom_smooth(se=FALSE, color="blue", size = 1, method = "auto") +
+  #scale_x_continuous(breaks = c(1/3, 2/3), labels= NULL)+
+  #scale_y_continuous(limits= c(0,11), breaks = c(3.33, 6.66), labels= NULL)+
+  theme_bw() + theme(panel.grid = element_blank())
+
+
+p8 <- ggplot(data = DAdnL4, aes(x=methylation, y=expression)) +
+  geom_point(color = "grey35", size = 0.75) + xlim(0,1)+
+  geom_hline(yintercept = 5.25, color= "grey70", size=0.5)+geom_hline(yintercept = 6.5, color= "grey70", size=.5)+
+  geom_vline(xintercept = 0.34, color= "grey70", size=.5)+geom_vline(xintercept = 0.67, color= "grey70", size=.5)+
+  #geom_smooth(se=FALSE, color="blue", size = 1, method = "auto") +
+  #scale_x_continuous(breaks = c(1/3, 2/3), labels= NULL)+
+  #scale_y_continuous(limits= c(0,11), breaks = c(3.33, 6.66), labels= NULL)+
+  theme_bw() + theme(panel.grid = element_blank())  
+```
+
+
+```{r}
+figure1 <- ggarrange(p1, p6, 
+                    labels = c("A", "B"),
+                    ncol = 1, nrow = 2)
+figure1
+```
+
+
+```{r}
+figure4 <- ggarrange(p1, p3, p4, p5, p6, p7, p8, p9,
+                     labels= c("A", "B", "C", "D", "E", "F", "G", "H"),
+                    ncol = 3, nrow = 3)
+figure4
+```

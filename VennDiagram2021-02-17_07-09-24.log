@@ -1,0 +1,32 @@
+INFO [2021-02-17 07:09:24] $x
+INFO [2021-02-17 07:09:24] list(cmiDA = resultsAll[, "DA_CMI"], cmiGEO = resultsAll[, "GEO_CMI"], 
+INFO [2021-02-17 07:09:24]     cmiTCGA = resultsAll[, "TCGA_CMI"])
+INFO [2021-02-17 07:09:24] 
+INFO [2021-02-17 07:09:24] $filename
+INFO [2021-02-17 07:09:24] NULL
+INFO [2021-02-17 07:09:24] 
+INFO [2021-02-17 07:09:24] $lty
+INFO [2021-02-17 07:09:24] [1] "blank"
+INFO [2021-02-17 07:09:24] 
+INFO [2021-02-17 07:09:24] $fill
+INFO [2021-02-17 07:09:24] c("pink1", "skyblue", "mediumorchid")
+INFO [2021-02-17 07:09:24] 
+INFO [2021-02-17 07:09:24] $main
+INFO [2021-02-17 07:09:24] [1] "Genes in common between the three -CMI selected- gene lists"
+INFO [2021-02-17 07:09:24] 
+INFO [2021-02-17 07:09:24] $x
+INFO [2021-02-17 07:09:24] list(naiveDA = resultsAll[, "DA_naive"], cmiDA = resultsAll[, 
+INFO [2021-02-17 07:09:24]     "DA_CMI"], heuristicDA = resultsAll[, "DA_heuristic"])
+INFO [2021-02-17 07:09:24] 
+INFO [2021-02-17 07:09:24] $filename
+INFO [2021-02-17 07:09:24] NULL
+INFO [2021-02-17 07:09:24] 
+INFO [2021-02-17 07:09:24] $lty
+INFO [2021-02-17 07:09:24] [1] "blank"
+INFO [2021-02-17 07:09:24] 
+INFO [2021-02-17 07:09:24] $fill
+INFO [2021-02-17 07:09:24] c("pink1", "skyblue", "mediumorchid")
+INFO [2021-02-17 07:09:24] 
+INFO [2021-02-17 07:09:24] $main
+INFO [2021-02-17 07:09:24] [1] "Genes in common between the three methods in DA dataset"
+INFO [2021-02-17 07:09:24] 

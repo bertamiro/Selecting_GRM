@@ -190,3 +190,6 @@ The methods section should include:
 
 En el nostre cas en el que _el resultat és un mètode_ no estic segur de si serà el mateix.
 
+# TEMES PENDENTS ("SERRELLS")
+
+- Unificar paquets Lheuristic i Lheuristic-1 i Shiny-App

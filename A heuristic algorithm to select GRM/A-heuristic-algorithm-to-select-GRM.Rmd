@@ -1,44 +1,24 @@
 ---
-title:  _A heuristic algorithm to select genes potentially regulated by methylation_
+title: _A heuristic algorithm to select genes potentially regulated by methylation_
 author:
   - name: Alex Sanchez-Pla
     email: asanchez@ub.edu
-    affiliation: Universitat de Barcelona (UB)
+    affiliation: 
+    - Universitat de Barcelona (UB)
+    - Vall d'Hebron Research Institute (VHIR)
     corresponding: asanchez@ub.edu
   - name: Berta Miro
     email: berta.miro@vhir.org
     affiliation: Vall d'Hebron Research Institute (VHIR)
-
 address:
   - code: Universitat de Barcelona (UB)
     address:  Departament of Genetics Microbiology and Statistics, Avda Diagonal 645, Barcelona, 08028
   - code: Vall d'Hebron Research Institute (VHIR)
     address: Statistics and Bioinformatics Unit (UEB), Passeig de la Vall d'Hebron 119-129, Barcelona, 08035
-  
-
 abstract: |
-Methylation is a key process in cancer. It usually acts by inhibiting
-the expression of the gene. However, when methylation is low, any values of
-gene expression can be found for that given gene. This suggests that, to select
-genes regulated by methylation, one may look for patterns in the relationship
-between gene expression and methylation that show either an L-shape or a
-negative correlation between expression and methylation. TO that end, we have
-developed a heuristic algorithm that mimics the process of visually
-selecting an ``L-shape'', where genes can show a wide range of
-expression values (from low to high) when methylation is low, but only low
-expression for intermediate or high methylation.  
-The method has been implemented in an R package,
-``Lheuristic'' and a Shiny application, both available from GitHub
-(http://github.com/alexsanchezpla). For two given two matrices - for expression 
-and methylation values and with the same row and column names - the program
-offers the possibility to select genes based on either negative
-correlation, the heuristic algorithm or both methods at once. Once genes
-have been selected, results can be interactively reviewed, plotted or
-downloaded. 
-The method shows good performance when compared against  the naïve correlation, 
-especially due to its flexibility.
+  Methylation is key process in cancer. It usually acts by inhibiting the expression of the gene. However, when methylation is low, any values of gene expression can be found for that given gene. This suggests that, to select genes regulated by methylation, one may look for patterns in the relationship between gene expression and methylation that show either an "L-shape" or a negative correlation between expression and methylation. To that end, we have developed a heuristic algorithm that mimics the process of visually selecting an "L-shape", where genes can show a wide range of expression values (from low to high) when methylation is low, but only low expression for intermediate or high methylation.   The method has been implemented in an R package, "Lheuristic" and a Shiny application, both available from GitHub (http://github.com/alexsanchezpla). For two given two matrices - for expression  and methylation values and with the same row and column names - the program offers the possibility to select genes based on either negative correlation, the heuristic algorithm or both methods at once. Once genes have been selected, results can be interactively reviewed, plotted or downloaded.  The method shows good performance when compared against  the naïve correlation,  especially due to its flexibility.
   
-author_summary: |
+author_summary:
 
 bibliography: mybibfile.bib
 output: rticles::plos_article

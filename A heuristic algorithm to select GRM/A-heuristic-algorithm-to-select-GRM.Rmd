@@ -123,7 +123,7 @@ The R package `simstudy`  was used to create 4 artificial datasets by using the 
 
 
 ## Tuning of parameters
-
+To 
 
 
 # Results
@@ -134,10 +134,10 @@ The heuristic method was tested with the 4 artificial datasets previously descri
 ### Measures of performance for the heuristic method with synthetic datasets
 Sensitivity, specificity and accuracy for the heuristic model were measured for the 4 synthetic datasets (Fig. [ssa]) with the predefined parameters described in the above section. Specificity was the parameter that scored highest in all datsets, with values between 0.99 (for the datasets with 50 samples) and 1 (for the datasets with 1000 samples). The second highest parameter was accuracy. In this, both datasets containing 1% of GRM genes scored 0.99, whereas the datasets with 10% of GRM  genes scored 0.93 (for the one with 50 samples) and 0.92 (for the one with 1000 samples). Finally, the sensitivity values were the lowest in the combination of 1% GRM and 1000 samples (0.1) and highest for 1% GRM and 50 samples (0.5).  These results indicate that the classification scored better non-L shaped scatterplots (true negatives) than L-shaped scatterplots (true positives).
 
-<!-- ![ssa](senspecacc.png "Sensitivity, specificity and accuracy for the 4 synthetic dastets") -->
+
 
 ## Tuning of parameters to improve method performance
-The selection of L-shaped genes with the heuristic method depends on a variety of parameters. Changing the parameters affects the number of genes that will be called "L-shaped" so we would want to find an optimal set of parameters for every parameter combination thus some performance measures such as sensitivity or specificity can be optimized.
+The selection of "L-shaped" genes with the heuristic method depends on a variety of parameters. Changing the parameters affects the number of genes that will be called "L-shaped" so we would want to find an optimal set of parameters for every parameter combination thus some performance measures such as sensitivity or specificity can be optimized.
 
 A limitation with this approach is that it requires a set of "TRUE Positives" -genes known to have L-shape- or TRUE negatives genes known not to have L-shape- and this is very hard to obtain from experimental samples. A way to perform a selection between the TRUE and FALSE genes is by visually inspecting the genes and selecting two sets that can be described as "clearly L" and "clearly non-L". This is however fairly accurate, a more difficult concept to execute, with the added subjectivity to the selection, for example in samples that no that "clear". To override that, synthetic datasets were created. As they were designed based on known TRUE and FALSE patterns we were able to evaluate the method.
 
@@ -151,14 +151,18 @@ A limitation with this approach is that it requires a set of "TRUE Positives" -g
 
 # References {#references .unnumbered}
 
-\clearpage
 
+
+
+\clearpage
 # Figures and captions
 
-![Example of non-Lshape vs L-shape for the methylation--expression scatterplots associated with two real genes. A represents a gene potentially regulated by methylation as expression decreases with increasing methylation, giving a L--shaped scatterplot that can be graphycally selected. B represents a gene not regulated by methylation, since no correlation between expression and methylation values is visible.](figures/Figure1.png){#id .class width=50% height=100%}
+![Example of non-Lshape vs L-shape for the methylation--expression scatterplots associated with two real genes. A represents a gene potentially regulated by methylation as expression decreases with increasing methylation, giving a L--shaped scatterplot that can be graphycally selected. B represents a gene not regulated by methylation, since no correlation between expression and methylation values is visible.](figures/Figure1.png){#id .class width=50% height=50%}
 
-![Grid representation to select L--shaped genes. A grid was superimposed on the methylation--expression  scatterplot graphs, each cell representing one ninth of the graph. The grid partitioning of the scatterplot was used to weigh the sample points so that sample points on green cells would score higher whereas sample points on the red cell would be penalized. Sample points distributed on the grey cells would be given intermediatte weights](figures/Figure2.png){#id .class width=50% height=100%}
+![Grid representation to select L--shaped genes. A grid was superimposed on the methylation--expression  scatterplot graphs, each cell representing one ninth of the graph. The grid partitioning of the scatterplot was used to weigh the sample points so that sample points on green cells would score higher whereas sample points on the red cell would be penalized. Sample points distributed on the grey cells would be given intermediatte weights.](figures/Figure2.png){#id .class width=50% height=30%}
 
+![Representation of the 3 L--shaped vs the 5 non-L--shape methylation--expression scatterplots from the artificially generated genes. Figures A--C represent L--shaped genes and figures D--H represent various patterns form non--L shaped genes. Subtle differences in L--shaped genes are to assign correct weigth to the grid for the right grouping toward L or non--L. Gene represented in A has the 4 top right cells empty, gene in B has a similar oint distribution in the center cell and in the bottom left cell, and gene in C has the bottom left cell empty, and follows a stronger negative linear pattern. For the non--L patterns, there is the D top distribution, E bottom distribution, F no pattern, G left distribution, and H right distribution.](figures/Figure3.png){#id .class width=50% height=30%}
 
-![Representation of the 3 Lshape vs the 5 non-L-shape methylation--expression scatterplots from the artificially generated genes. Figures A--C represent L--shaped genes and figures D--H represent various patterns form non--L shaped genes. Subtle differences in L--shaped genes are to assign correct weigth to the grid for the right grouping toward L or non--L. Gene represented in A has the 4 top right cells empty, gene in B has a similar oint distribution in the center cell and in the bottom left cell, and gene in C has the bottom left cell empty, and follows a stronger negative linear pattern. For the non--L patterns, there is the D top distribution, E bottom distribution, F no pattern, G left distribution, and H right distribution.](figures/Figure3.png){#id .class width=50% height=500%}
-![Representation of the 3 Lshape vs the 5 non-L-shape methylation--expression scatterplots from real genes. Figures A--C represent L--shaped genes and figures D--H represent various patterns form non--L shaped genes. Following the same order of representation as above.](figures/Figure4.png){#id .class width=50% height=500%}
+![Representation of the 3 L--shaped vs the 5 non-L--shaped methylation--expression scatterplots from real genes. Figures A--C represent L--shaped genes and figures D--H represent various patterns form non--L shaped genes. Following the same order of representation as above.](figures/Figure4.png){#id .class width=50% height=30%}
+
+![Sensitivity, accuracy and specificity obtained in the for types of artificially generated datasets: 1% L--shaped genes and 50 samples, 10% and 50 samples, 1% and 1000 samples and 10% and 1000 samples.](figures/senspecacc.png){#id .class width=50% height=30%}

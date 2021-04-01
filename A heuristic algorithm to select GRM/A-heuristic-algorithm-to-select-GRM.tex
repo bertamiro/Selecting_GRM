@@ -529,6 +529,8 @@ based on real gene patterns observed from a colorectal cancer study
 \hypertarget{tuning-of-parameters}{%
 \subsection{Tuning of parameters}\label{tuning-of-parameters}}
 
+To
+
 \hypertarget{results}{%
 \section{Results}\label{results}}
 
@@ -566,8 +568,8 @@ negatives) than L-shaped scatterplots (true positives).
 \subsection{Tuning of parameters to improve method
 performance}\label{tuning-of-parameters-to-improve-method-performance}}
 
-The selection of L-shaped genes with the heuristic method depends on a
-variety of parameters. Changing the parameters affects the number of
+The selection of ``L-shaped'' genes with the heuristic method depends on
+a variety of parameters. Changing the parameters affects the number of
 genes that will be called ``L-shaped'' so we would want to find an
 optimal set of parameters for every parameter combination thus some
 performance measures such as sensitivity or specificity can be
@@ -608,7 +610,7 @@ dataset}\label{detection-of-l-and-no-l-scatterplots-with-the-heuristic-algorithm
 \begin{figure}
 \hypertarget{id}{%
 \centering
-\includegraphics[width=0.5\textwidth,height=1\textheight]{figures/Figure1.png}
+\includegraphics[width=0.5\textwidth,height=0.5\textheight]{figures/Figure1.png}
 \caption{Example of non-Lshape vs L-shape for the
 methylation--expression scatterplots associated with two real genes. A
 represents a gene potentially regulated by methylation as expression
@@ -622,19 +624,57 @@ values is visible.}\label{id}
 \begin{figure}
 \hypertarget{id}{%
 \centering
-\includegraphics[width=0.5\textwidth,height=1\textheight]{figures/Figure2.png}
+\includegraphics[width=0.5\textwidth,height=0.3\textheight]{figures/Figure2.png}
 \caption{Grid representation to select L--shaped genes. A grid was
 superimposed on the methylation--expression scatterplot graphs, each
 cell representing one ninth of the graph. The grid partitioning of the
 scatterplot was used to weigh the sample points so that sample points on
 green cells would score higher whereas sample points on the red cell
 would be penalized. Sample points distributed on the grey cells would be
-given intermediatte weights}\label{id}
+given intermediatte weights.}\label{id}
 }
 \end{figure}
 
-\includegraphics[width=0.5\textwidth,height=5\textheight]{figures/Figure3.png}
-\includegraphics[width=0.5\textwidth,height=5\textheight]{figures/Figure4.png}
+\begin{figure}
+\hypertarget{id}{%
+\centering
+\includegraphics[width=0.5\textwidth,height=0.3\textheight]{figures/Figure3.png}
+\caption{Representation of the 3 L--shaped vs the 5 non-L--shape
+methylation--expression scatterplots from the artificially generated
+genes. Figures A--C represent L--shaped genes and figures D--H represent
+various patterns form non--L shaped genes. Subtle differences in
+L--shaped genes are to assign correct weigth to the grid for the right
+grouping toward L or non--L. Gene represented in A has the 4 top right
+cells empty, gene in B has a similar oint distribution in the center
+cell and in the bottom left cell, and gene in C has the bottom left cell
+empty, and follows a stronger negative linear pattern. For the non--L
+patterns, there is the D top distribution, E bottom distribution, F no
+pattern, G left distribution, and H right distribution.}\label{id}
+}
+\end{figure}
+
+\begin{figure}
+\hypertarget{id}{%
+\centering
+\includegraphics[width=0.5\textwidth,height=0.3\textheight]{figures/Figure4.png}
+\caption{Representation of the 3 L--shaped vs the 5 non-L--shaped
+methylation--expression scatterplots from real genes. Figures A--C
+represent L--shaped genes and figures D--H represent various patterns
+form non--L shaped genes. Following the same order of representation as
+above.}\label{id}
+}
+\end{figure}
+
+\begin{figure}
+\hypertarget{id}{%
+\centering
+\includegraphics[width=0.5\textwidth,height=0.3\textheight]{figures/senspecacc.png}
+\caption{Sensitivity, accuracy and specificity obtained in the for types
+of artificially generated datasets: 1\% L--shaped genes and 50 samples,
+10\% and 50 samples, 1\% and 1000 samples and 10\% and 1000
+samples.}\label{id}
+}
+\end{figure}
 
 \hypertarget{refs}{}
 \leavevmode\hypertarget{ref-Berger2009}{}%

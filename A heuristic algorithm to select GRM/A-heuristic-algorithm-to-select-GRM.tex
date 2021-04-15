@@ -171,6 +171,31 @@
 
 
 % Pandoc citation processing
+\newlength{\csllabelwidth}
+\setlength{\csllabelwidth}{3em}
+\newlength{\cslhangindent}
+\setlength{\cslhangindent}{1.5em}
+% for Pandoc 2.8 to 2.10.1
+\newenvironment{cslreferences}%
+  {}%
+  {\par}
+% For Pandoc 2.11+
+\newenvironment{CSLReferences}[3] % #1 hanging-ident, #2 entry spacing
+ {% don't indent paragraphs
+  \setlength{\parindent}{0pt}
+  % turn on hanging indent if param 1 is 1
+  \ifodd #1 \everypar{\setlength{\hangindent}{\cslhangindent}}\ignorespaces\fi
+  % set entry spacing
+  \ifnum #2 > 0
+  \setlength{\parskip}{#2\baselineskip}
+  \fi
+ }%
+ {}
+\usepackage{calc} % for calculating minipage widths
+\newcommand{\CSLBlock}[1]{#1\hfill\break}
+\newcommand{\CSLLeftMargin}[1]{\parbox[t]{\csllabelwidth}{#1}}
+\newcommand{\CSLRightInline}[1]{\parbox[t]{\linewidth - \csllabelwidth}{#1}}
+\newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
 
 
 
@@ -184,7 +209,8 @@
 \setcounter{secnumdepth}{0}
 
 \newcommand{\getAff}[1]{
-  \getIndex{#1}{Universitat de Barcelona (UB),Vall d'Hebron Research Institute (VHIR)}
+  \getIndex{#1}{Universitat de Barcelona (UB),Vall d'Hebron Research
+Institute (VHIR)}
 }
 
 \providecommand{\tightlist}{%
@@ -196,19 +222,24 @@
 % Title must be 250 characters or less.
 \begin{flushleft}
 {\Large
-\textbf\newline{\emph{A heuristic algorithm to select genes potentially regulated by
+\textbf\newline{\emph{A heuristic algorithm to select genes potentially
+regulated by
 methylation}} % Please use "sentence case" for title and headings (capitalize only the first word in a title (or heading), the first word in a subtitle (or subheading), and any proper nouns).
 }
 \newline
 % Insert author names, affiliations and corresponding author email (do not include titles, positions, or degrees).
 \\
-Alex Sanchez-Pla\textsuperscript{\getAff{Universitat de Barcelona (UB)}, \getAff{Vall d'Hebron Research Institute (VHIR)}}\textsuperscript{*},
-Berta Miro\textsuperscript{\getAff{Vall d'Hebron Research Institute (VHIR)}}\\
+Alex Sanchez-Pla\textsuperscript{\getAff{Universitat de Barcelona
+(UB)}, \getAff{Vall d'Hebron Research Institute
+(VHIR)}}\textsuperscript{*},
+Berta Miro\textsuperscript{\getAff{Vall d'Hebron Research Institute
+(VHIR)}}\\
 \bigskip
-\textbf{\getAff{Universitat de Barcelona (UB)}}Departament of Genetics Microbiology and Statistics, Avda Diagonal 645,
-Barcelona, 08028\\
-\textbf{\getAff{Vall d'Hebron Research Institute (VHIR)}}Statistics and Bioinformatics Unit (UEB), Passeig de la Vall d'Hebron
-119-129, Barcelona, 08035\\
+\textbf{\getAff{Universitat de Barcelona (UB)}}Departament of Genetics
+Microbiology and Statistics, Avda Diagonal 645, Barcelona, 08028\\
+\textbf{\getAff{Vall d'Hebron Research Institute (VHIR)}}Statistics and
+Bioinformatics Unit (UEB), Passeig de la Vall d'Hebron 119-129,
+Barcelona, 08035\\
 \bigskip
 * Corresponding author: asanchez@ub.edu\\
 \end{flushleft}
@@ -221,7 +252,7 @@ select genes regulated by methylation, one may look for patterns in the
 relationship between gene expression and methylation that show either an
 ``L-shape'' or a negative correlation between expression and
 methylation. To that end, we have developed a heuristic algorithm that
-mimics the process of visually selecting an ``L-shape'', where genes can
+mimics the process of visually selecting an ``L-shape,'' where genes can
 show a wide range of expression values (from low to high) when
 methylation is low, but only low expression for intermediate or high
 methylation. The method has been implemented in an R package,
@@ -295,7 +326,8 @@ cancer, the epigenetic events and their impact on the transcriptional
 reprogramming observed in colorectal tumors have not been extensively
 characterized. Although recent genome-wide studies have analyzed the
 genomic distribution of hypermethylated CpGs in a small number of
-colorectal tumors (\textbf{???}; \textbf{???}; \textbf{???}), a detailed
+colorectal tumors ({[}\textbf{McInnes2017?}{]};
+{[}\textbf{Dong2019?}{]}; {[}\textbf{Orjuela2020?}{]}), a detailed
 analysis of the subset of these events that are important for gene
 expression regulation is currently lacking. Just as gene expression
 microarrays accelerated and revolutionized the study of transcriptional
@@ -326,67 +358,69 @@ analyses}\label{existing-methods-and-analyses}}
 The association between gene expression and DNA methylation in the CpG
 islands in particular has been long studied; and as a result, mostly
 negative correlations have been found to relate to cancer driven
-mechanisms (\textbf{???}), but this inverse relationship between DNA
-methylation of the first intron in particular and gene expression is a
-broad mechanism to down-regulate gene expression and it is found in
-numerous processes, organisms and tissues ({[}12{]}). There have been
-various studies analysing this correlation using various approaches. For
-example, Massie et al., (2017) looked at the relationship between gene
-expression and DNA methylation at the probe level rather than at the
-gene level. They narrowed a list of genes regulated by methylation that
-were identified in more than 3 out of 17 studies (\textbf{???}). Another
-study analysed the TCGA database to identify patterns in DNA CpG
-methylation and gene expression and tumor status. They found that the
-association involved a reduced number of genes linked to cancer than
-originally anticipated (around the hundreds) and that not all
-correlations were negative ({[}13{]}). Another recent paper reported two
-different models for analysis of DNA methylation and regulation of gene
-expression, one for negatively correlated genes and one for positively
-correlated genes (\textbf{???}). They used expression (GSE106582) and
+mechanisms ({[}\textbf{Sadikovic2008?}{]}), but this inverse
+relationship between DNA methylation of the first intron in particular
+and gene expression is a broad mechanism to down-regulate gene
+expression and it is found in numerous processes, organisms and tissues
+({[}12{]}). There have been various studies analysing this correlation
+using various approaches. For example, Massie et al., (2017) looked at
+the relationship between gene expression and DNA methylation at the
+probe level rather than at the gene level. They narrowed a list of genes
+regulated by methylation that were identified in more than 3 out of 17
+studies ({[}\textbf{Massie2017?}{]}). Another study analysed the TCGA
+database to identify patterns in DNA CpG methylation and gene expression
+and tumor status. They found that the association involved a reduced
+number of genes linked to cancer than originally anticipated (around the
+hundreds) and that not all correlations were negative ({[}13{]}).
+Another recent paper reported two different models for analysis of DNA
+methylation and regulation of gene expression, one for negatively
+correlated genes and one for positively correlated genes
+({[}\textbf{Klett2018?}{]}). They used expression (GSE106582) and
 methylation datasets (GSE101764) containing 194 samples, 77 tumors and
 117 of the mucose. By random forest analysis they were able to classify
 genes into cancer related and not related. Still methodologies to find
 tune classification into cancer/disease related and not cancer/disease
 related are still needed. A previously developed method was the
 selection of genes with an L-shape association between the expression
-and the methylation datasets (\textbf{???}). In this research, they
-focused on the CMI and on a method based on spline regression. They
-observed that the first method would detect L-shaped genes more
-accurately in big datasets. On the other hand, the splines clustering
-was not size dependent, but it would yield a smaller number of samples.
-Other research exists that aimed to identify genes regulated by
-methylation according to the expression methylation patterns; however,
-they only use a particular methodology like the CMI (\textbf{???}) with
-positive results. A paper focused on the identification of genes
-regulated by methylation through unsupervised clustering techniques to
-identify CRC subtypes was able to confirm existing subtypes
-({[}14{]}).There has been other work that focused on the development of
-platforms for the identification of genes regulated by methylation. One
-of these packages is MEXPRESS (\textbf{???}). This package has a web
-interface that allows the user to visualize expression and methylation
-data from genes in the TCGA data. The visualization collocates for each
-selected gene, CpG islands, with transcripts expression together with
-other clinical values such as gender and age. The tool also generates
-p-values in relation to the variables specified. Another one of these
-packages is Methylmix (\textbf{???}). The algorithm is based on a beta
-mixture model that identifies methylation states and compares them with
-what they call normal conditions to find hypo- and hyper-methylated
-genes. They developed a new statistic coeficient, the Differential
-Methylation value or DM-value which is defined as the difference of a
-methylation state with the normal methylation state. Then, they
-correlate that coefficient with gene expression data to characterize the
-association between methylation level and gene expression. For
-expression and methylation correlation analyses of both RNA and DNA
-molecules there is also a web based tool that analyses methylated genes
-based on TCGA data, called MethHC
-(http://methhc.mbc.nctu.edu.tw/php/search.php?opt=gene, \textbf{???}).
-This database has an analysis tool that provides gene-specific analysis
-for various diseases, and the information is displayed as a comparison
-between diseased and normal (non-diseased) conditions; list of highest
-and lowest methylated (hyper and hypo) genes; as well as correlations
-between expression and methylation. In this, methylation is a binary
-value (0,1). Other methodologies to identify methylated genes associated
-with cancer is through text mining analysis, as in the PubMeth database
+and the methylation datasets ({[}\textbf{Sanchez-Pla2017?}{]}). In this
+research, they focused on the CMI and on a method based on spline
+regression. They observed that the first method would detect L-shaped
+genes more accurately in big datasets. On the other hand, the splines
+clustering was not size dependent, but it would yield a smaller number
+of samples. Other research exists that aimed to identify genes regulated
+by methylation according to the expression methylation patterns;
+however, they only use a particular methodology like the CMI
+({[}\textbf{Liu2012?}{]}) with positive results. A paper focused on the
+identification of genes regulated by methylation through unsupervised
+clustering techniques to identify CRC subtypes was able to confirm
+existing subtypes ({[}14{]}).There has been other work that focused on
+the development of platforms for the identification of genes regulated
+by methylation. One of these packages is MEXPRESS
+({[}\textbf{Koch2015?}{]}). This package has a web interface that allows
+the user to visualize expression and methylation data from genes in the
+TCGA data. The visualization collocates for each selected gene, CpG
+islands, with transcripts expression together with other clinical values
+such as gender and age. The tool also generates p-values in relation to
+the variables specified. Another one of these packages is Methylmix
+({[}\textbf{Gevaert2015?}{]}). The algorithm is based on a beta mixture
+model that identifies methylation states and compares them with what
+they call normal conditions to find hypo- and hyper-methylated genes.
+They developed a new statistic coeficient, the Differential Methylation
+value or DM-value which is defined as the difference of a methylation
+state with the normal methylation state. Then, they correlate that
+coefficient with gene expression data to characterize the association
+between methylation level and gene expression. For expression and
+methylation correlation analyses of both RNA and DNA molecules there is
+also a web based tool that analyses methylated genes based on TCGA data,
+called MethHC (http://methhc.mbc.nctu.edu.tw/php/search.php?opt=gene,
+{[}\textbf{Huang2015?}{]}). This database has an analysis tool that
+provides gene-specific analysis for various diseases, and the
+information is displayed as a comparison between diseased and normal
+(non-diseased) conditions; list of highest and lowest methylated (hyper
+and hypo) genes; as well as correlations between expression and
+methylation. In this, methylation is a binary value (0,1). Other
+methodologies to identify methylated genes associated with cancer is
+through text mining analysis, as in the PubMeth database
 (www.pubmeth.org, {[}15{]}). In this, they identified 5000 genes of 1000
 publications. However, high-throughput methodologies that offer an
 impartial approach to the identification of genes regulated by
@@ -580,10 +614,10 @@ Positives'' -genes known to have L-shape- or TRUE negatives genes known
 not to have L-shape- and this is very hard to obtain from experimental
 samples. A way to perform a selection between the TRUE and FALSE genes
 is by visually inspecting the genes and selecting two sets that can be
-described as ``clearly L'' and ``clearly non-L''. This is however fairly
+described as ``clearly L'' and ``clearly non-L.'' This is however fairly
 accurate, a more difficult concept to execute, with the added
 subjectivity to the selection, for example in samples that no that
-``clear''. To override that, synthetic datasets were created. As they
+``clear.'' To override that, synthetic datasets were created. As they
 were designed based on known TRUE and FALSE patterns we were able to
 evaluate the method.
 
@@ -677,96 +711,116 @@ samples.}\label{id}
 \end{figure}
 
 \hypertarget{refs}{}
+\begin{CSLReferences}{0}{0}
 \leavevmode\hypertarget{ref-Berger2009}{}%
-1. Berger SL, Kouzarides T, Shiekhattar R, Shilatifard A. An operational
-definition of epigenetics. Genes and Development. 2009;23: 781--783.
-doi:\href{https://doi.org/10.1101/gad.1787609}{10.1101/gad.1787609}
+\CSLLeftMargin{1. }
+\CSLRightInline{Berger SL, Kouzarides T, Shiekhattar R, Shilatifard A.
+{An operational definition of epigenetics}. Genes and Development.
+2009;23: 781--783.
+doi:\href{https://doi.org/10.1101/gad.1787609}{10.1101/gad.1787609}}
 
 \leavevmode\hypertarget{ref-Saxonov2006}{}%
-2. Saxonov S, Berg P, Brutlag DL. A genome-wide analysis of CpG
-dinucleotides in the human genome distinguishes two distinct classes of
-promoters. Proceedings of the National Academy of Sciences of the United
-States of America. 2006;103: 1412--1417.
-doi:\href{https://doi.org/10.1073/pnas.0510310103}{10.1073/pnas.0510310103}
+\CSLLeftMargin{2. }
+\CSLRightInline{Saxonov S, Berg P, Brutlag DL. {A genome-wide analysis
+of CpG dinucleotides in the human genome distinguishes two distinct
+classes of promoters}. Proceedings of the National Academy of Sciences
+of the United States of America. 2006;103: 1412--1417.
+doi:\href{https://doi.org/10.1073/pnas.0510310103}{10.1073/pnas.0510310103}}
 
 \leavevmode\hypertarget{ref-Reik2007}{}%
-3. Reik W. Stability and flexibility of epigenetic gene regulation in
-mammalian development. Nature Publishing Group; 2007. pp. 425--432.
-doi:\href{https://doi.org/10.1038/nature05918}{10.1038/nature05918}
+\CSLLeftMargin{3. }
+\CSLRightInline{Reik W. {Stability and flexibility of epigenetic gene
+regulation in mammalian development}. Nature Publishing Group; 2007. pp.
+425--432.
+doi:\href{https://doi.org/10.1038/nature05918}{10.1038/nature05918}}
 
 \leavevmode\hypertarget{ref-Portela2010}{}%
-4. Portela A, Esteller M. Epigenetic modifications and human disease.
-2010. pp. 1057--1068.
-doi:\href{https://doi.org/10.1038/nbt.1685}{10.1038/nbt.1685}
+\CSLLeftMargin{4. }
+\CSLRightInline{Portela A, Esteller M. {Epigenetic modifications and
+human disease}. 2010. pp. 1057--1068.
+doi:\href{https://doi.org/10.1038/nbt.1685}{10.1038/nbt.1685}}
 
 \leavevmode\hypertarget{ref-Feil2012}{}%
-5. Feil R, Fraga MF. Epigenetics and the environment: Emerging patterns
-and implications. 2012. pp. 97--109.
-doi:\href{https://doi.org/10.1038/nrg3142}{10.1038/nrg3142}
+\CSLLeftMargin{5. }
+\CSLRightInline{Feil R, Fraga MF. {Epigenetics and the environment:
+Emerging patterns and implications}. 2012. pp. 97--109.
+doi:\href{https://doi.org/10.1038/nrg3142}{10.1038/nrg3142}}
 
 \leavevmode\hypertarget{ref-Benayoun2015}{}%
-6. Benayoun BA, Pollina EA, Brunet A. Epigenetic regulation of ageing:
-Linking environmental inputs to genomic stability. Nature Publishing
-Group; 2015. pp. 593--610.
-doi:\href{https://doi.org/10.1038/nrm4048}{10.1038/nrm4048}
+\CSLLeftMargin{6. }
+\CSLRightInline{Benayoun BA, Pollina EA, Brunet A. {Epigenetic
+regulation of ageing: Linking environmental inputs to genomic
+stability}. Nature Publishing Group; 2015. pp. 593--610.
+doi:\href{https://doi.org/10.1038/nrm4048}{10.1038/nrm4048}}
 
 \leavevmode\hypertarget{ref-Jones2002}{}%
-7. Jones PA, Baylin SB. The fundamental role of epigenetic events in
-cancer. 2002. pp. 415--428.
-doi:\href{https://doi.org/10.1038/nrg816}{10.1038/nrg816}
+\CSLLeftMargin{7. }
+\CSLRightInline{Jones PA, Baylin SB. {The fundamental role of epigenetic
+events in cancer}. 2002. pp. 415--428.
+doi:\href{https://doi.org/10.1038/nrg816}{10.1038/nrg816}}
 
 \leavevmode\hypertarget{ref-Feinberg1983}{}%
-8. Feinberg AP, Vogelstein B. Hypomethylation distinguishes genes of
-some human cancers from their normal counterparts. Nature. 1983;301:
-89--92. doi:\href{https://doi.org/10.1038/301089a0}{10.1038/301089a0}
+\CSLLeftMargin{8. }
+\CSLRightInline{Feinberg AP, Vogelstein B. {Hypomethylation
+distinguishes genes of some human cancers from their normal
+counterparts}. Nature. 1983;301: 89--92.
+doi:\href{https://doi.org/10.1038/301089a0}{10.1038/301089a0}}
 
 \leavevmode\hypertarget{ref-Yang2014}{}%
-9. Yang X, Han H, DeCarvalho DD, Lay FD, Jones PA, Liang G. Gene body
-methylation can alter gene expression and is a therapeutic target in
-cancer. Cancer Cell. Cell Press; 2014;26: 577--590.
-doi:\href{https://doi.org/10.1016/j.ccr.2014.07.028}{10.1016/j.ccr.2014.07.028}
+\CSLLeftMargin{9. }
+\CSLRightInline{Yang X, Han H, DeCarvalho DD, Lay FD, Jones PA, Liang G.
+{Gene body methylation can alter gene expression and is a therapeutic
+target in cancer}. Cancer Cell. Cell Press; 2014;26: 577--590.
+doi:\href{https://doi.org/10.1016/j.ccr.2014.07.028}{10.1016/j.ccr.2014.07.028}}
 
 \leavevmode\hypertarget{ref-Zhang2010}{}%
-10. Zhang Y, Jeltsch A. The application of next generation sequencing in
-DNA methylation analysis. 2010. pp. 85--101.
-doi:\href{https://doi.org/10.3390/genes1010085}{10.3390/genes1010085}
+\CSLLeftMargin{10. }
+\CSLRightInline{Zhang Y, Jeltsch A. {The application of next generation
+sequencing in DNA methylation analysis}. 2010. pp. 85--101.
+doi:\href{https://doi.org/10.3390/genes1010085}{10.3390/genes1010085}}
 
 \leavevmode\hypertarget{ref-Wreczycka2017}{}%
-11. Wreczycka K, Gosdschan A, Yusuf D, Grüning B, Assenov Y, Akalin A.
-Strategies for analyzing bisulfite sequencing data. Journal of
-Biotechnology. 2017;261: 105--115.
-doi:\href{https://doi.org/10.1016/j.jbiotec.2017.08.007}{10.1016/j.jbiotec.2017.08.007}
+\CSLLeftMargin{11. }
+\CSLRightInline{Wreczycka K, Gosdschan A, Yusuf D, Grüning B, Assenov Y,
+Akalin A. {Strategies for analyzing bisulfite sequencing data}. Journal
+of Biotechnology. 2017;261: 105--115.
+doi:\href{https://doi.org/10.1016/j.jbiotec.2017.08.007}{10.1016/j.jbiotec.2017.08.007}}
 
 \leavevmode\hypertarget{ref-Anastasiadi2018}{}%
-12. Anastasiadi D, Esteve-Codina A, Piferrer F. Consistent inverse
-correlation between DNA methylation of the first intron and gene
-expression across tissues and species. Epigenetics and Chromatin. BioMed
-Central Ltd. 2018;11.
-doi:\href{https://doi.org/10.1186/s13072-018-0205-1}{10.1186/s13072-018-0205-1}
+\CSLLeftMargin{12. }
+\CSLRightInline{Anastasiadi D, Esteve-Codina A, Piferrer F. {Consistent
+inverse correlation between DNA methylation of the first intron and gene
+expression across tissues and species}. Epigenetics and Chromatin.
+BioMed Central Ltd.; 2018;11.
+doi:\href{https://doi.org/10.1186/s13072-018-0205-1}{10.1186/s13072-018-0205-1}}
 
 \leavevmode\hypertarget{ref-Long2017}{}%
-13. Long MD, Smiraglia DJ, Campbell MJ. The Genomic Impact of DNA CpG
-Methylation on Gene Expression; Relationships in Prostate Cancer.
-Biomolecules. Multidisciplinary Digital Publishing Institute (MDPI);
-2017;7.
-doi:\href{https://doi.org/10.3390/biom7010015}{10.3390/biom7010015}
+\CSLLeftMargin{13. }
+\CSLRightInline{Long MD, Smiraglia DJ, Campbell MJ. {The Genomic Impact
+of DNA CpG Methylation on Gene Expression; Relationships in Prostate
+Cancer.} Biomolecules. Multidisciplinary Digital Publishing Institute
+(MDPI); 2017;7.
+doi:\href{https://doi.org/10.3390/biom7010015}{10.3390/biom7010015}}
 
 \leavevmode\hypertarget{ref-Barat2015}{}%
-14. Barat A, Ruskin H, Byrne A, Prehn J. Integrating Colon Cancer
-Microarray Data: Associating Locus-Specific Methylation Groups to Gene
-Expression-Based Classifications. Microarrays. MDPI AG; 2015;4:
+\CSLLeftMargin{14. }
+\CSLRightInline{Barat A, Ruskin H, Byrne A, Prehn J. {Integrating Colon
+Cancer Microarray Data: Associating Locus-Specific Methylation Groups to
+Gene Expression-Based Classifications}. Microarrays. MDPI AG; 2015;4:
 630--646.
-doi:\href{https://doi.org/10.3390/microarrays4040630}{10.3390/microarrays4040630}
+doi:\href{https://doi.org/10.3390/microarrays4040630}{10.3390/microarrays4040630}}
 
 \leavevmode\hypertarget{ref-Ongenaert2007}{}%
-15. Ongenaert M, Van Neste L, De Meyer T, Menschaert G, Bekaert S, Van
-Criekinge W. PubMeth: a cancer methylation database combining
-text-mining and expert annotation. Nucleic Acids Research. 2007;36:
-D842--D846.
-doi:\href{https://doi.org/10.1093/nar/gkm788}{10.1093/nar/gkm788}
+\CSLLeftMargin{15. }
+\CSLRightInline{Ongenaert M, Van Neste L, De Meyer T, Menschaert G,
+Bekaert S, Van Criekinge W. {PubMeth: a cancer methylation database
+combining text-mining and expert annotation}. Nucleic Acids Research.
+2007;36: D842--D846.
+doi:\href{https://doi.org/10.1093/nar/gkm788}{10.1093/nar/gkm788}}
+
+\end{CSLReferences}
 
 \nolinenumbers
 
 
 \end{document}
-

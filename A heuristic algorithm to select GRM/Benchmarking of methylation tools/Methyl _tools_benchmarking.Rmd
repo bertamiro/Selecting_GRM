@@ -1,0 +1,154 @@
+---
+title: "Benchmarking of tools for the analysis of methylation and expression data"
+author: "BM"
+date: "`r Sys.Date()`"
+output:
+    prettydoc::html_pretty:
+    toc: true
+    toc_depth: 4
+    number_sections: true  
+    theme: tactile
+---
+
+# Introduction
+
+# Methodology
+
+Tools were obtained from the tool catalogue **bio.tools**, using the keywords *methylation analysis* and *R package*, were 39 tools were identified. Using the keywords *methylation expression analysis* and *BioConductor*, 18 tools were identified. The lists of tools are as follows. Of these, common tools identified were: BPRtools, MEAL, COHCAP, MassArray, FEM, and NanoMethVIz.
+
+# Tools identified
+The following information was collated based on the description of the tool in **bio.tools** 18 tools listed from the specific keywords.
+
+## ELMER
+
+This tool is designed to use DNA methylation and gene expression from a large number of samples to infer a regulatory element landscape and transcription factor network in primary tissues.
+http://bioconductor.org/packages/release/bioc/html/ELMER.html
+
+## MethylMix
+
+Algorithm implemented to identify hyper/hypomethylated genes for a disease. Based on a beta mixture model to identify methylation states and compares them with the normal DNA methylation state. It uses the Differential Methylation value or DM-value defined as the difference of a methylation state with the normal methylation state. Matched gene expression data is used to identify, besides differential, functional methylation states by focusing on methylation changes that effect gene expression.
+http://bioconductor.org/packages/release/bioc/html/MethylMix.html
+
+## GGtools
+
+Software and data for analyses in genetics of gene expression and/or DNA methylation.
+http://bioconductor.org/packages/release/bioc/html/GGtools.html
+
+## COHCAP
+
+This package provides a pipeline to analyze single-nucleotide resolution methylation data (Illumina 450k/EPIC methylation array, targeted BS-Seq, etc.). It provides differential methylation for CpG Sites, differential methylation for CpG Islands, integration with gene expression data, with visualizaton options.
+http://bioconductor.org/packages/release/bioc/html/COHCAP.html
+
+## MEAL
+
+Package to integrate methylation and expression data. It can also perform methylation or expression analysis alone. Several plotting functionalities are included as well as a new region analysis based on redundancy analysis. Effect of SNPs on a region can also be estimated.
+http://bioconductor.org/packages/release/bioc/html/MEAL.html
+
+## FEM
+
+This package performs a systems-level integrative analysis of DNA methylation and gene expression data. It seeks modules of functionally related genes which exhibit differential promoter DNA methylation and differential expression, where an inverse association between promoter DNA methylation and gene expression is assumed.
+http://bioconductor.org/packages/release/bioc/html/FEM.html
+
+## MassArray
+
+This package is designed for the import, quality control, analysis, and visualization of methylation data generated using Sequenom's platform. The tools herein contain a highly detailed amplicon prediction for optimal assay design. Also included are quality control measures of data, such as primer dimer and bisulfite conversion efficiency estimation. Methylation data are calculated using the same algorithms contained in the EpiTyper software package.
+http://bioconductor.org/packages/release/bioc/html/MassArray.html
+
+## BPRMeth
+
+This package uses the Binomial Probit Regression likelihood to model methylation profiles and extract higher order features. These features quantitate precisely notions of shape of a methylation profile. Using these higher order features across promoter-proximal regions, we construct a powerful predictor of gene expression. Also, these features are used to cluster proximal-promoter regions using the EM algorithm.
+http://bioconductor.org/packages/release/bioc/html/BPRMeth.html
+
+## TCGAbiolinksGUI
+
+A Graphical User Interface to analyze cancer molecular and clinical data.
+http://bioconductor.org/packages/release/bioc/html/TCGAbiolinksGUI.html
+
+## DSS
+
+R library that performs differential analysis for count-based sequencing data. It detects differentially expressed genes (DEGs) from RNA-seq and differentially methylated loci or regions (DML/DMRs) from bisulfite sequencing (BS-seq). Its core is a new dispersion shrinkage method for estimating the dispersion parameter from Gamma-Poisson or Beta-Binomial distributions.
+http://bioconductor.org/packages/release/bioc/html/DSS.html
+
+## SMITE
+
+This package builds on the Epimods framework which facilitates finding weighted subnetworks ("modules") on Illumina Infinium 27k arrays using the SpinGlass algorithm, as implemented in the iGraph package. We have created a class of gene centric annotations associated with p-values and effect sizes and scores from any researchers prior statistical results to find functional modules.
+http://bioconductor.org/packages/release/bioc/html/SMITE.html
+
+## canceR
+
+This package is a user friendly interface based on the cgdsr and other modeling packages to explore, compare, and analyse all available cancer data (Clinical data, Gene Mutation, Gene Methylation, Gene Expression, Protein Phosphorylation, Copy Number Alteration) hosted by the Computational Biology Center at Memorial-Sloan-Kettering Cancer Center (MSKCC).
+http://bioconductor.org/packages/release/bioc/html/canceR.html
+
+## lumi
+
+This package provides an integrated solution for the Illumina microarray data analysis. It includes functions of Illumina BeadStudio (GenomeStudio) data input, quality control, BeadArray-specific variance stabilization, normalization and gene annotation at the probe level. It also includes the functions of processing Illumina methylation microarrays, especially Illumina Infinium methylation microarrays.
+http://bioconductor.org/packages/release/bioc/html/lumi.html
+
+## IWTomics
+
+Implementation of the Interval-Wise Testing (IWT) for omics data. This inferential procedure tests for differences in "Omics" data between two groups of genomic regions (or between a group of genomic regions and a reference center of symmetry), and does not require fixing location and scale at the outset.
+http://bioconductor.org/packages/release/bioc/html/IWTomics.html
+
+## M3D
+
+This package identifies statistically significantly differentially methylated regions of CpGs. It uses kernel methods (the Maximum Mean Discrepancy) to measure differences in methylation profiles, and relates these to inter-replicate changes, whilst accounting for variation in coverage profiles.
+http://bioconductor.org/packages/release/bioc/html/M3D.html
+
+
+## Repitools
+
+Tools for the analysis of enrichment-based epigenomic data. Features include summarization and visualization of epigenomic data across promoters according to gene expression context, finding regions of differential methylation/binding, BayMeth for quantifying methylation etc.
+http://bioconductor.org/packages/release/bioc/html/Repitools.html
+
+## omicRexposome
+
+It systematizes the association evaluation between exposures and omic data, taking advantage of MultiDataSet for coordinated data management, rexposome for exposome data definition and limma for association testing. Also to perform data integration mixing exposome and omic data using multi co-inherent analysis (omicade4) and multi-canonical correlation analysis (PMA).
+http://bioconductor.org/packages/release/bioc/html/omicRexposome.html
+
+## NanoMethViz
+
+An R/Bioconductor package for visualizing long-read methylation data. Visualise methlation data from Oxford Nanopore sequencing. NanoMethViz is a toolkit for visualising methylation data from Oxford Nanopore sequencing. It can be used to explore methylation patterns from reads derived from Oxford Nanopore direct DNA sequencing with methylation called by callers including nanopolish, f5c and megalodon. The plots in this package allow the visualisation of methylation profiles aggregated over experimental groups and across classes of genomic features.
+https://bioconductor.org/packages/NanoMethViz
+
+
+From the 39 tools identified with more generalized keywords:
+
+## EpiMethEx
+
+R package for large-scale integrated analysis in methylation hotspots linked to genetic regulation.
+https://github.com/giupardeb/EpiMethEx
+
+## MultiDataSet
+
+Implementation of the BRGE's (Bioinformatic Research Group in Epidemiology from Center for Research in Environmental Epidemiology) dataset and MethylationSet. It is designed for integrating multi omics data sets and MethylationSet to contain normalized methylation data. These package contains base classes for MEAL and rexposome packages.
+http://bioconductor.org/packages/release/bioc/html/MultiDataSet.html
+
+## IMIX
+
+A multivariate mixture model approach to integrative analysis of multiple types of omics data. R package for integrative genomics analysis using a multivariate mixture model framework. Ziqiao Wang and Peng Wei. IMIX: A multivariate mixture model approach to integrative analysis of multiple types of omics data. bioRxiv 2020.06.23.167312; doi: https://doi.org/10.1101/2020.06.23.167312.
+https://github.com/ziqiaow/IMIX
+
+
+
+# Tools selected
+
+Needs testing with our data
+
+## FEM
+## MEAL -- MultiDataSet
+## COHCAP
+## ELMER
+## GGtools
+## BPRMeth
+## MethylMix (?)
+## omicRexposome (?)
+
+## Test results
+
+
+# Key findings
+
+
+
+# References
+

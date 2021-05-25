@@ -30,6 +30,29 @@ Sys.setlocale("LC_TIME", "C")
 
 (De totes formes __potser millor enviar a PLOS ONE__ ja que l'estil és semblant a aquest: https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0118621#ack)
 
+# TEMES PENDENTS ("SERRELLS")
+
+- Revisar background
+    + Veure si està Ok
+    + Si es que falta alguna cosa veure si la tenim a la llista
+- Posar els objectius (el que diu a 5.4.)
+- Revisar si mètodes ja coincideix amb 6.1
+- Simulació
+    + Revisar com està explicada
+- Tuning of Parameters
+    +__Resumir: Quin és el problema__
+    + Resoldre/Ignorar/Guidelines
+- Aplicació a datasets reals
+    + Dataset Diego?/TCGA/GEO (_resultat negatiu_)
+    + Esta fet. Actualitzar i considerar GEO
+- Unificar paquets Lheuristic i Lheuristic-1 
+    + Revisar que els pesos sumin 1 i % 100
+    + Completar el paquet ("a la Pol")
+    + Integrar amb Shiny
+-Discussió i limitacions
+    + Redactar-la
+
+
 # TitlePage
  El títol "A heuristic algorithm to select genes potentially regulated by methylation" està bé, Falta veure si l'hem emprat exactament igual i quansts cops, 
 
@@ -189,4 +212,5 @@ The methods section should include:
 </it>
 
 En el nostre cas en el que _el resultat és un mètode_ no estic segur de si serà el mateix.
+
 

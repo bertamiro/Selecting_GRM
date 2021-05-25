@@ -4,6 +4,8 @@ output:
   html_document:
     theme: united
     toc: yes
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r global_options, include=FALSE}
